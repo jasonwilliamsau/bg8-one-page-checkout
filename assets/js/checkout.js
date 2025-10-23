@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.body.classList.contains('woocommerce-checkout')) return;
 
+  // Skip loader functionality in page builders
+  const isPageBuilder = document.body.classList.contains('oxygen-body') ||
+                       document.body.classList.contains('elementor-editor-active') ||
+                       document.body.classList.contains('et-fb') ||
+                       document.body.classList.contains('brxe-editor') ||
+                       document.body.classList.contains('fl-builder') ||
+                       document.body.classList.contains('wp-admin');
+
   const checkoutForm    = document.querySelector('form.checkout');
   const customerDetails = document.querySelector('#customer_details');
   const orderReview     = document.querySelector('#order_review');
@@ -13,53 +21,81 @@ document.addEventListener('DOMContentLoaded', () => {
   wrapper.className = 'wc-checkout';
   checkoutForm.prepend(wrapper);
 
-  // Stepper nav + error summary
-  const stepsNav = document.createElement('ul');
-  stepsNav.className = 'wc-steps';
-  stepsNav.setAttribute('role', 'tablist');
+  // Create header (will be populated by PHP)
+  const header = document.createElement('div');
+  header.className = 'wc-checkout-header';
+  header.innerHTML = `
+    <h1 class="wc-checkout-title"></h1>
+    <p class="wc-checkout-subtitle"></p>
+  `;
+
+  // Create steps indicator
+  const stepsIndicator = document.createElement('div');
+  stepsIndicator.className = 'wc-steps-indicator';
+
+  // Create content wrapper
+  const content = document.createElement('div');
+  content.className = 'wc-checkout-content';
 
   const errSummary = document.createElement('div');
   errSummary.id = 'wc-error-summary';
   errSummary.hidden = true;
   errSummary.setAttribute('tabindex', '-1');
-  errSummary.innerHTML = `<strong>There’s a problem:</strong><ul></ul>`;
+  errSummary.innerHTML = `<strong>There's a problem:</strong><ul></ul>`;
 
   const makeStep = (id, title, nodes = []) => {
     const panel = document.createElement('section');
-    panel.className = 'wc-step';
+    panel.className = 'wc-step-content';
     panel.id = id;
     panel.setAttribute('role', 'tabpanel');
     panel.setAttribute('aria-labelledby', `${id}-tab`);
+    
+    const formSection = document.createElement('div');
+    formSection.className = 'wc-form-section';
+    
     const h = document.createElement('h3');
-    h.className = 'wc-step__title';
     h.textContent = title;
+    
     const body = document.createElement('div');
-    body.className = 'wc-step__content';
     nodes.forEach(n => n && body.append(n));
+    
     const actions = document.createElement('div');
-    actions.className = 'wc-step__actions';
-    panel.append(h, body, actions);
+    actions.className = 'wc-checkout-actions';
+    
+    formSection.append(h, body);
+    panel.append(formSection, actions);
     return { panel, body, actions, heading: h };
   };
   const makeTab = (id, label, index) => {
-    const li = document.createElement('li');
-    li.className = 'wc-steps__item';
-    const btn = document.createElement('button');
-    btn.className = 'wc-steps__btn';
-    btn.type = 'button';
-    btn.id = `${id}-tab`;
-    btn.setAttribute('role', 'tab');
-    btn.setAttribute('aria-controls', id);
-    btn.setAttribute('data-step-index', String(index));
-    btn.textContent = `${index + 1}. ${label}`;
-    li.append(btn);
-    return { li, btn };
+    const step = document.createElement('div');
+    step.className = 'wc-step';
+    step.id = `${id}-tab`;
+    step.setAttribute('role', 'tab');
+    step.setAttribute('aria-controls', id);
+    step.setAttribute('data-step-index', String(index));
+    
+    const number = document.createElement('div');
+    number.className = 'wc-step-number';
+    number.textContent = index + 1;
+    
+    const stepLabel = document.createElement('div');
+    stepLabel.className = 'wc-step-label';
+    stepLabel.textContent = label;
+    
+    const arrow = document.createElement('div');
+    arrow.className = 'wc-step-arrow';
+    arrow.textContent = '→';
+    
+    step.append(number, stepLabel, arrow);
+    return { step, number, stepLabel };
   };
 
   const col1 = customerDetails.querySelector('.col-1');
   const col2 = customerDetails.querySelector('.col-2');
   const billingFields  = col1?.querySelector('.woocommerce-billing-fields');
   const shippingFields = col2?.querySelector('.woocommerce-shipping-fields');
+  const additionalFields = customerDetails.querySelector('.woocommerce-additional-fields') || 
+                           checkoutForm.querySelector('.woocommerce-additional-fields');
 
   const steps = [];
   const tabs  = [];
@@ -67,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Step 1 — Your details (billing)
   const step1 = makeStep('wc-step-billing', 'Enter your details');
   if (billingFields) step1.body.append(billingFields);
+  if (additionalFields) step1.body.append(additionalFields);
   steps.push(step1.panel);
   tabs.push(makeTab('wc-step-billing', 'Your details', 0));
 
@@ -102,19 +139,35 @@ document.addEventListener('DOMContentLoaded', () => {
   tabs.push(makeTab('wc-step-confirm', 'Confirm', 2));
 
   // Assemble
-  tabs.forEach(t => stepsNav.append(t.li));
-  wrapper.append(stepsNav, errSummary);
-  steps.forEach(s => wrapper.append(s));
+  tabs.forEach(t => stepsIndicator.append(t.step));
+  content.append(errSummary);
+  steps.forEach(s => content.append(s));
+  
+  // Configure header from PHP settings
+  const config = window.bg8CheckoutConfig || {};
+  const titleEl = header.querySelector('.wc-checkout-title');
+  const descEl = header.querySelector('.wc-checkout-subtitle');
+  
+  if (config.title) titleEl.textContent = config.title;
+  if (config.description) descEl.textContent = config.description;
+  
+  // Show header only if at least one field has content
+  const showHeader = config.showHeader === true;
+  if (showHeader) {
+    wrapper.append(header, stepsIndicator, content);
+  } else {
+    wrapper.append(stepsIndicator, content);
+  }
   customerDetails.remove(); // moved children
 
   // Controls
   const addActions = (panel, index) => {
-    const actions = panel.querySelector('.wc-step__actions');
+    const actions = panel.querySelector('.wc-checkout-actions');
     if (index > 0) {
       const back = document.createElement('button');
       back.type = 'button';
-      back.className = 'wc-btn wc-btn--secondary';
-      back.textContent = 'Back';
+      back.className = 'wc-btn wc-btn-secondary';
+      back.textContent = '← Back';
       back.addEventListener('click', () => goTo(index - 1));
       actions.append(back);
     } else {
@@ -122,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const next = document.createElement('button');
     next.type = 'button';
-    next.className = 'wc-btn';
-    next.textContent = index === steps.length - 1 ? 'Place Order' : 'Next';
+    next.className = 'wc-btn wc-btn-primary';
+    next.textContent = index === steps.length - 1 ? 'Place Order' : 'Continue →';
     next.addEventListener('click', () => {
       if (!validateStep(steps[index])) return;
       if (index < steps.length - 1) {
@@ -143,20 +196,23 @@ document.addEventListener('DOMContentLoaded', () => {
   function goTo(idx) {
     idx = computeSkips(idx);
 
-    tabs.forEach(({ btn }, i) => {
-      btn.setAttribute('aria-current', i === idx ? 'step' : 'false');
-      btn.disabled = i > idx + 1; // allow back and immediate next
+    tabs.forEach(({ step }, i) => {
+      step.classList.toggle('active', i === idx);
+      step.classList.toggle('completed', i < idx);
     });
-    steps.forEach((panel, i) => { panel.hidden = i !== idx; });
+    steps.forEach((panel, i) => { 
+      panel.classList.toggle('active', i === idx);
+      panel.style.display = i === idx ? 'block' : 'none';
+    });
     current = idx;
     document.body.classList.toggle('wc-step--confirm-active', current === 2);
     history.replaceState(null, '', `#step-${idx + 1}`);
   }
 
   // Allow clicking next tab (validate), clicking back freely
-  tabs.forEach(({ btn }) => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.getAttribute('data-step-index'), 10);
+  tabs.forEach(({ step }) => {
+    step.addEventListener('click', () => {
+      const idx = parseInt(step.getAttribute('data-step-index'), 10);
       if (idx <= current) { goTo(idx); return; }
       if (idx === current + 1) {
         if (!validateStep(steps[current])) return;
@@ -211,8 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Init state
-  steps.forEach((p, i) => { if (i !== 0) p.hidden = true; });
-  tabs.forEach(({ btn }, i) => { btn.disabled = i > 1; if (i === 0) btn.setAttribute('aria-current', 'step'); });
+  steps.forEach((p, i) => { 
+    if (i !== 0) {
+      p.style.display = 'none';
+    } else {
+      p.classList.add('active');
+    }
+  });
+  tabs.forEach(({ step }, i) => { 
+    if (i === 0) {
+      step.classList.add('active');
+    }
+  });
 
   const m = (location.hash || '').match(/#step-(\d+)/);
   const start = m ? Math.max(0, Math.min(steps.length - 1, parseInt(m[1], 10) - 1)) : 0;

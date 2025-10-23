@@ -30,6 +30,11 @@ define( 'BG8_SC_URL', plugin_dir_url( __FILE__ ) );
 // Bootstrap
 require_once BG8_SC_DIR . 'includes/class-bg8-one-page-checkout.php';
 
+// Load debug helper if debug mode is enabled
+if ( defined( 'BG8_SC_DEBUG' ) && BG8_SC_DEBUG ) {
+    require_once BG8_SC_DIR . 'includes/class-bg8-debug.php';
+}
+
 add_action( 'plugins_loaded', function() {
     \BG8\OnePageCheckout\Plugin::init();
 });
