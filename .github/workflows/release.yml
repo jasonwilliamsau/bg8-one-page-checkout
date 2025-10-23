@@ -14,6 +14,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     
     steps:
     - name: Checkout code
@@ -66,7 +69,7 @@ jobs:
           dist/*.txt
     
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ steps.version.outputs.version }}
         name: BG8 One Page Checkout v${{ steps.version.outputs.version }}
@@ -81,7 +84,7 @@ jobs:
           2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
           3. Choose the ZIP file and click "Install Now"
           4. Activate the plugin
-          5. Configure settings at Settings → BG8 Checkout
+          5. Configure settings at WooCommerce → BG8 Checkout
           
           ## Requirements
           
@@ -99,6 +102,8 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Commit version changes
       run: |
