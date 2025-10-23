@@ -1,0 +1,53 @@
+{
+  "name": "bg8-one-page-checkout",
+  "version": "1.1.0",
+  "description": "Converts WooCommerce checkout into a 3-step, single-column, accessible stepper with brand styling, pre-paint overlay, and improved UX. Includes admin configuration for colors and labels.",
+  "main": "bg8-one-page-checkout.php",
+  "scripts": {
+    "deploy": "./deploy.sh",
+    "version:patch": "npm version patch && git push --tags",
+    "version:minor": "npm version minor && git push --tags",
+    "version:major": "npm version major && git push --tags",
+    "release": "npm run deploy && git add . && git commit -m 'Release v$(node -p \"require('./package.json').version\")' && git push",
+    "test": "php -l bg8-one-page-checkout.php && php -l includes/class-bg8-one-page-checkout.php && php -l includes/class-bg8-admin.php",
+    "validate": "npm run test && ./deploy.sh --validate-only"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonwilliamsau/bg8-one-page-checkout.git"
+  },
+  "keywords": [
+    "wordpress",
+    "woocommerce",
+    "checkout",
+    "ecommerce",
+    "plugin",
+    "stepper",
+    "multi-step",
+    "accessibility"
+  ],
+  "author": "Blackgate <https://blackgate.com.au>",
+  "license": "GPL-2.0+",
+  "bugs": {
+    "url": "https://github.com/jasonwilliamsau/bg8-one-page-checkout/issues"
+  },
+  "homepage": "https://github.com/jasonwilliamsau/bg8-one-page-checkout#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "php": ">=7.4"
+  },
+  "devDependencies": {},
+  "wordpress": {
+    "requires": "6.0",
+    "tested": "6.4",
+    "requires_php": "7.4"
+  },
+  "files": [
+    "bg8-one-page-checkout.php",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "assets/",
+    "includes/"
+  ]
+}

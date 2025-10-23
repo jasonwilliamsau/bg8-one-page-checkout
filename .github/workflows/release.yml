@@ -1,0 +1,118 @@
+name: WordPress Plugin Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.1.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Validate plugin files
+      run: |
+        php -l bg8-one-page-checkout.php
+        php -l includes/class-bg8-one-page-checkout.php
+        php -l includes/class-bg8-admin.php
+        echo "✅ PHP syntax validation passed"
+    
+    - name: Extract version from tag
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Update plugin version
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        sed -i "s/Version: .*/Version: $VERSION/" bg8-one-page-checkout.php
+        sed -i "s/define( 'BG8_SC_VERSION', .*/define( 'BG8_SC_VERSION', '$VERSION' );/" bg8-one-page-checkout.php
+        echo "Updated plugin version to $VERSION"
+    
+    - name: Create deployment package
+      run: |
+        chmod +x deploy.sh
+        ./deploy.sh
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: wordpress-plugin-${{ steps.version.outputs.version }}
+        path: |
+          dist/*.zip
+          dist/*.md
+          dist/*.txt
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        name: BG8 One Page Checkout v${{ steps.version.outputs.version }}
+        body: |
+          ## What's New in v${{ steps.version.outputs.version }}
+          
+          See [CHANGELOG.md](CHANGELOG.md) for complete details.
+          
+          ## Installation
+          
+          1. Download the ZIP file below
+          2. Go to WordPress Admin → Plugins → Add New → Upload Plugin
+          3. Choose the ZIP file and click "Install Now"
+          4. Activate the plugin
+          5. Configure settings at Settings → BG8 Checkout
+          
+          ## Requirements
+          
+          - WordPress 6.0+
+          - PHP 7.4+
+          - WooCommerce plugin
+          
+          ## Support
+          
+          - [GitHub Issues](https://github.com/jasonwilliamsau/bg8-one-page-checkout/issues)
+          - [Documentation](https://github.com/jasonwilliamsau/bg8-one-page-checkout/wiki)
+        files: |
+          dist/*.zip
+          dist/*.md
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+    
+    - name: Commit version changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add bg8-one-page-checkout.php
+        git commit -m "Update version to ${{ steps.version.outputs.version }}" || exit 0
+        git push
