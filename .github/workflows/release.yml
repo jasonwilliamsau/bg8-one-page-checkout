@@ -27,15 +27,6 @@ jobs:
         php-version: '7.4'
         extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
     - name: Validate plugin files
       run: |
         php -l bg8-one-page-checkout.php
