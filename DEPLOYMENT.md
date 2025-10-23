@@ -23,6 +23,12 @@ This guide explains how to deploy and release the BG8 One Page Checkout WordPres
 
 ### Complete Release Process
 ```bash
+# Automated release (recommended)
+./release.sh patch   # 1.1.0 → 1.1.1
+./release.sh minor   # 1.1.0 → 1.2.0
+./release.sh major   # 1.1.0 → 2.0.0
+
+# Or using NPM
 npm run release
 ```
 
@@ -66,6 +72,24 @@ bg8-one-page-checkout/
 ```
 
 ## 🔄 Version Management
+
+### Complete Release Automation (`release.sh`)
+The `release.sh` script handles the entire release process automatically:
+
+```bash
+./release.sh patch   # 1.1.0 → 1.1.1
+./release.sh minor   # 1.1.0 → 1.2.0
+./release.sh major   # 1.1.0 → 2.0.0
+```
+
+**What it does:**
+- ✅ Bumps version in plugin header and constant
+- ✅ Updates CHANGELOG.md (converts [Unreleased] to version)
+- ✅ Commits all changes with release message
+- ✅ Creates git tag
+- ✅ Pushes changes and tags to GitHub
+- ✅ Runs deployment script
+- ✅ Validates git repository state
 
 ### Manual Version Bump
 ```bash
@@ -122,7 +146,11 @@ git push origin v1.1.1
 - [ ] Run deployment: `./deploy.sh`
 - [ ] Test ZIP installation
 
-### Release Process
+### Release Process (Automated)
+- [ ] Run: `./release.sh [patch|minor|major]`
+- [ ] Script handles everything automatically
+
+### Release Process (Manual)
 - [ ] Bump version: `./version-bump.sh [patch|minor|major]`
 - [ ] Review changes: `git diff`
 - [ ] Commit changes: `git add . && git commit -m "Release v1.1.1"`
@@ -167,6 +195,7 @@ bg8-one-page-checkout/
 ├── bg8-one-page-checkout.php        # Main plugin file
 ├── deploy.sh                        # Deployment script
 ├── version-bump.sh                  # Version bump script
+├── release.sh                       # Complete release automation
 ├── package.json                     # NPM configuration
 ├── assets/
 │   ├── css/checkout.css
