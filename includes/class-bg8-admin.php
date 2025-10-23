@@ -260,6 +260,7 @@ class Admin {
                         do_settings_sections( 'bg8-one-page-checkout' );
                         ?>
                         <button type="submit" class="bg8-button-primary">Save Changes</button>
+                        <button type="button" class="bg8-button-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
                     </form>
 
                     <div class="bg8-preview-section">
@@ -404,6 +405,31 @@ class Admin {
         ' );
         
         // Native HTML5 color picker - no JavaScript needed
+        
+        // Add reset to defaults functionality
+        wp_add_inline_script( 'admin-bar', '
+            function resetToDefaults() {
+                if (confirm("Are you sure you want to reset all settings to their default values? This cannot be undone.")) {
+                    // Reset color fields
+                    document.getElementById("brand_color").value = "#d4127c";
+                    document.getElementById("primary_color").value = "#0073aa";
+                    document.getElementById("success_color").value = "#00a32a";
+                    document.getElementById("header_text_color").value = "#ffffff";
+                    
+                    // Reset text fields
+                    document.getElementById("step_1_label").value = "Your Details";
+                    document.getElementById("step_1_heading").value = "Enter your billing information";
+                    document.getElementById("step_2_label").value = "Recipient";
+                    document.getElementById("step_2_heading").value = "Shipping information";
+                    document.getElementById("step_3_label").value = "Confirm";
+                    document.getElementById("step_3_heading").value = "Review your order";
+                    document.getElementById("checkout_title").value = "Checkout";
+                    document.getElementById("checkout_description").value = "Complete your purchase in 3 simple steps";
+                    
+                    alert("Settings have been reset to defaults. Click Save Changes to apply them.");
+                }
+            }
+        ' );
     }
 
     /**
