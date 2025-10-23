@@ -22,11 +22,14 @@ echo -e "${YELLOW}Current version: ${CURRENT_VERSION}${NC}"
 
 # Bump version using npm
 echo -e "${BLUE}Bumping ${TYPE} version...${NC}"
-npm version ${TYPE} --no-git-tag-version
-
-# Get new version
-NEW_VERSION=$(grep "Version:" bg8-one-page-checkout.php | sed 's/.*Version: *//' | tr -d ' ')
+NEW_VERSION=$(npm version ${TYPE} --no-git-tag-version | sed 's/v//')
 echo -e "${GREEN}New version: ${NEW_VERSION}${NC}"
+
+# Update plugin files with new version
+echo -e "${BLUE}Updating plugin files...${NC}"
+sed -i.bak "s/Version: .*/Version: ${NEW_VERSION}/" bg8-one-page-checkout.php
+sed -i.bak "s/define( 'BG8_SC_VERSION', .*/define( 'BG8_SC_VERSION', '${NEW_VERSION}' );/" bg8-one-page-checkout.php
+rm -f bg8-one-page-checkout.php.bak
 
 # Update CHANGELOG.md
 echo -e "${BLUE}Updating CHANGELOG.md...${NC}"
