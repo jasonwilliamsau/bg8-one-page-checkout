@@ -63,6 +63,7 @@ print_info "Copying plugin files..."
 # Copy main plugin files
 cp bg8-one-page-checkout.php "${PLUGIN_BUILD_DIR}/"
 cp README.md "${PLUGIN_BUILD_DIR}/"
+cp readme.txt "${PLUGIN_BUILD_DIR}/"
 cp CHANGELOG.md "${PLUGIN_BUILD_DIR}/"
 cp LICENSE "${PLUGIN_BUILD_DIR}/"
 
