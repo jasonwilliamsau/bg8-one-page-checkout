@@ -11,9 +11,8 @@
  * Text Domain: bg8-one-page-checkout
  * Domain Path: /languages
  * Requires at least: 6.0
- * Tested up to: 6.4
+ * Tested up to: 6.8
  * Requires PHP: 7.4
- * Network: false
  * 
  * @package BG8_OnePageCheckout
  * @version 1.1.0

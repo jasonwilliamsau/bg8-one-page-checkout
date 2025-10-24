@@ -200,24 +200,24 @@ class Admin {
      * Colors section callback
      */
     public static function colors_section_callback() {
-        echo '<div class="bg8-section-title">' . __( 'Color Settings', 'bg8-one-page-checkout' ) . '</div>';
-        echo '<p>' . __( 'Configure the color scheme for your checkout steps.', 'bg8-one-page-checkout' ) . '</p>';
+        echo '<div class="bg8-section-title">' . esc_html__( 'Color Settings', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Configure the color scheme for your checkout steps.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
      * Labels section callback
      */
     public static function labels_section_callback() {
-        echo '<div class="bg8-section-title">' . __( 'Tab Labels & Headings', 'bg8-one-page-checkout' ) . '</div>';
-        echo '<p>' . __( 'Customize the labels and headings for each checkout step.', 'bg8-one-page-checkout' ) . '</p>';
+        echo '<div class="bg8-section-title">' . esc_html__( 'Tab Labels & Headings', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Customize the labels and headings for each checkout step.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
      * Header section callback
      */
     public static function header_section_callback() {
-        echo '<div class="bg8-section-title">' . __( 'Checkout Header', 'bg8-one-page-checkout' ) . '</div>';
-        echo '<p>' . __( 'Customize the checkout page title and description. Leave both blank to hide the header completely.', 'bg8-one-page-checkout' ) . '</p>';
+        echo '<div class="bg8-section-title">' . esc_html__( 'Checkout Header', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Customize the checkout page title and description. Leave both blank to hide the header completely.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
@@ -227,7 +227,7 @@ class Admin {
         $options = get_option( self::OPTION_NAME, [] );
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
         
-        echo '<input type="color" id="' . esc_attr( $args['field'] ) . '" name="' . self::OPTION_NAME . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-color-picker" />';
+        // translators: %s is the default color value
         echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
 
@@ -238,7 +238,8 @@ class Admin {
         $options = get_option( self::OPTION_NAME, [] );
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
         
-        echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . self::OPTION_NAME . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" />';
+        echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" />';
+        // translators: %s is the default text value
         echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
 
@@ -264,11 +265,11 @@ class Admin {
                     </form>
 
                     <div class="bg8-preview-section">
-                        <div class="bg8-preview-title"><?php _e( 'Preview', 'bg8-one-page-checkout' ); ?></div>
-                        <p><?php _e( 'Visit your checkout page to see the changes in action.', 'bg8-one-page-checkout' ); ?></p>
+                        <div class="bg8-preview-title"><?php esc_html_e( 'Preview', 'bg8-one-page-checkout' ); ?></div>
+                        <p><?php esc_html_e( 'Visit your checkout page to see the changes in action.', 'bg8-one-page-checkout' ); ?></p>
                         <?php if ( function_exists( 'wc_get_page_permalink' ) ) : ?>
                             <a href="<?php echo esc_url( wc_get_page_permalink( 'checkout' ) ); ?>" class="bg8-button-secondary" target="_blank">
-                                <?php _e( 'View Checkout Page', 'bg8-one-page-checkout' ); ?>
+                                <?php esc_html_e( 'View Checkout Page', 'bg8-one-page-checkout' ); ?>
                             </a>
                         <?php endif; ?>
                     </div>

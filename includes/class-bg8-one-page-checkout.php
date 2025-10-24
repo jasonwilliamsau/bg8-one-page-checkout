@@ -32,11 +32,11 @@ class Plugin {
         
         // Skip loader in page builders and admin
         if ( is_admin() || 
-             ( isset( $_GET['ct_builder'] ) && sanitize_text_field( $_GET['ct_builder'] ) ) || // Oxygen Builder
-             ( isset( $_GET['elementor-preview'] ) && sanitize_text_field( $_GET['elementor-preview'] ) ) || // Elementor
-             ( isset( $_GET['et_fb'] ) && sanitize_text_field( $_GET['et_fb'] ) ) || // Divi Builder
-             ( isset( $_GET['bricks'] ) && sanitize_text_field( $_GET['bricks'] ) ) || // Bricks Builder
-             ( isset( $_GET['fl_builder'] ) && sanitize_text_field( $_GET['fl_builder'] ) ) ) { // Beaver Builder
+             ( isset( $_GET['ct_builder'] ) && sanitize_text_field( wp_unslash( $_GET['ct_builder'] ) ) ) || // Oxygen Builder
+             ( isset( $_GET['elementor-preview'] ) && sanitize_text_field( wp_unslash( $_GET['elementor-preview'] ) ) ) || // Elementor
+             ( isset( $_GET['et_fb'] ) && sanitize_text_field( wp_unslash( $_GET['et_fb'] ) ) ) || // Divi Builder
+             ( isset( $_GET['bricks'] ) && sanitize_text_field( wp_unslash( $_GET['bricks'] ) ) ) || // Bricks Builder
+             ( isset( $_GET['fl_builder'] ) && sanitize_text_field( wp_unslash( $_GET['fl_builder'] ) ) ) ) { // Beaver Builder
             return;
         }
         
@@ -65,6 +65,7 @@ class Plugin {
             echo '</style>';
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
+            // This error_log is intentionally used for debug purposes only
             error_log( 'BG8 One Page Checkout CSS injection error: ' . $e->getMessage() );
         }
     }
@@ -99,6 +100,7 @@ class Plugin {
             echo '</script>';
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
+            // This error_log is intentionally used for debug purposes only
             error_log( 'BG8 One Page Checkout header config error: ' . $e->getMessage() );
         }
     }

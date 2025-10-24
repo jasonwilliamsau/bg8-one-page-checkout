@@ -1,14 +1,14 @@
 === BG8 One Page Checkout ===
 Contributors: blackgate
-Tags: woocommerce, checkout, ecommerce, single-page, stepper, accessibility, ux
+Tags: woocommerce, checkout, ecommerce, accessibility
 Requires at least: 6.0
-Tested up to: 6.4
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Converts WooCommerce checkout into a 3-step, single-column, accessible stepper with brand styling, pre-paint overlay, and improved UX. Includes admin configuration for colors and labels.
+Converts WooCommerce checkout into a 3-step, accessible stepper with brand styling and improved UX.
 
 == Description ==
 

@@ -58,6 +58,7 @@ class BG8_Debug {
     
     public static function log_error( $message ) {
         if ( defined( 'BG8_SC_DEBUG' ) && BG8_SC_DEBUG ) {
+            // This error_log is intentionally used for debug purposes only
             error_log( '[BG8 One Page Checkout] ' . $message );
         }
     }
