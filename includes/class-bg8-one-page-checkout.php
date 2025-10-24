@@ -31,6 +31,7 @@ class Plugin {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
         
         // Skip loader in page builders and admin
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Page builder detection, not form processing
         if ( is_admin() || 
              ( isset( $_GET['ct_builder'] ) && sanitize_text_field( wp_unslash( $_GET['ct_builder'] ) ) ) || // Oxygen Builder
              ( isset( $_GET['elementor-preview'] ) && sanitize_text_field( wp_unslash( $_GET['elementor-preview'] ) ) ) || // Elementor
@@ -39,6 +40,7 @@ class Plugin {
              ( isset( $_GET['fl_builder'] ) && sanitize_text_field( wp_unslash( $_GET['fl_builder'] ) ) ) ) { // Beaver Builder
             return;
         }
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         
         echo '<script>document.documentElement.classList.add("wc-prep");</script>';
     }

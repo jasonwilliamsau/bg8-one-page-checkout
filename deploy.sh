@@ -70,6 +70,7 @@ cp LICENSE "${PLUGIN_BUILD_DIR}/"
 # Copy directories
 cp -r assets "${PLUGIN_BUILD_DIR}/"
 cp -r includes "${PLUGIN_BUILD_DIR}/"
+cp -r languages "${PLUGIN_BUILD_DIR}/"
 
 # Create .gitignore for the build (exclude development files)
 cat > "${PLUGIN_BUILD_DIR}/.gitignore" << EOF
