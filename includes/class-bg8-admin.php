@@ -228,7 +228,7 @@ class Admin {
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
         
         echo '<input type="color" id="' . esc_attr( $args['field'] ) . '" name="' . self::OPTION_NAME . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-color-picker" />';
-        echo '<p class="bg8-description">' . sprintf( __( 'Default: %s', 'bg8-one-page-checkout' ), $args['default'] ) . '</p>';
+        echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
 
     /**
@@ -239,7 +239,7 @@ class Admin {
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
         
         echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . self::OPTION_NAME . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" />';
-        echo '<p class="bg8-description">' . sprintf( __( 'Default: %s', 'bg8-one-page-checkout' ), $args['default'] ) . '</p>';
+        echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
 
     /**

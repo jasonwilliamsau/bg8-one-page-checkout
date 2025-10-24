@@ -32,11 +32,11 @@ class Plugin {
         
         // Skip loader in page builders and admin
         if ( is_admin() || 
-             ( isset( $_GET['ct_builder'] ) && $_GET['ct_builder'] ) || // Oxygen Builder
-             ( isset( $_GET['elementor-preview'] ) && $_GET['elementor-preview'] ) || // Elementor
-             ( isset( $_GET['et_fb'] ) && $_GET['et_fb'] ) || // Divi Builder
-             ( isset( $_GET['bricks'] ) && $_GET['bricks'] ) || // Bricks Builder
-             ( isset( $_GET['fl_builder'] ) && $_GET['fl_builder'] ) ) { // Beaver Builder
+             ( isset( $_GET['ct_builder'] ) && sanitize_text_field( $_GET['ct_builder'] ) ) || // Oxygen Builder
+             ( isset( $_GET['elementor-preview'] ) && sanitize_text_field( $_GET['elementor-preview'] ) ) || // Elementor
+             ( isset( $_GET['et_fb'] ) && sanitize_text_field( $_GET['et_fb'] ) ) || // Divi Builder
+             ( isset( $_GET['bricks'] ) && sanitize_text_field( $_GET['bricks'] ) ) || // Bricks Builder
+             ( isset( $_GET['fl_builder'] ) && sanitize_text_field( $_GET['fl_builder'] ) ) ) { // Beaver Builder
             return;
         }
         

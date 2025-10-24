@@ -7,16 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.5] - 2025-10-23
 
-## [1.1.5] - 2025-10-23
-
 ### Added
-- TBD
+- Comprehensive security hardening for WordPress.org submission
+- Proper escaping for all user-facing outputs
+- Sanitization of all user inputs including $_GET parameters
+- Nonce verification for admin form submissions (via WordPress Settings API)
 
 ### Changed
-- TBD
+- All debug output now properly escaped with esc_html() and esc_html__()
+- Page builder detection now sanitizes $_GET parameters
+- Admin form descriptions now properly escaped
 
 ### Fixed
-- TBD
+- Potential XSS vulnerabilities in debug output
+- Unsanitized $_GET parameter access
+- Unescaped admin form field descriptions
+- WordPress.org security compliance issues
 
 ### Added
 - Complete release automation script (`release.sh`)

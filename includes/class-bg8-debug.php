@@ -23,36 +23,36 @@ class BG8_Debug {
         }
         
         echo '<div id="bg8-debug" style="position: fixed; bottom: 0; left: 0; background: #000; color: #fff; padding: 10px; font-size: 12px; z-index: 9999; max-width: 400px; font-family: monospace;">';
-        echo '<strong>BG8 One Page Checkout Debug Info:</strong><br>';
+        echo '<strong>' . esc_html__( 'BG8 One Page Checkout Debug Info:', 'bg8-one-page-checkout' ) . '</strong><br>';
         
         // Plugin status
-        echo 'Plugin Active: ' . ( is_plugin_active( 'bg8-one-page-checkout/bg8-one-page-checkout.php' ) ? 'Yes' : 'No' ) . '<br>';
+        echo esc_html__( 'Plugin Active:', 'bg8-one-page-checkout' ) . ' ' . ( is_plugin_active( 'bg8-one-page-checkout/bg8-one-page-checkout.php' ) ? esc_html__( 'Yes', 'bg8-one-page-checkout' ) : esc_html__( 'No', 'bg8-one-page-checkout' ) ) . '<br>';
         
         // WooCommerce status
-        echo 'WooCommerce Active: ' . ( function_exists( 'is_woocommerce' ) ? 'Yes' : 'No' ) . '<br>';
+        echo esc_html__( 'WooCommerce Active:', 'bg8-one-page-checkout' ) . ' ' . ( function_exists( 'is_woocommerce' ) ? esc_html__( 'Yes', 'bg8-one-page-checkout' ) : esc_html__( 'No', 'bg8-one-page-checkout' ) ) . '<br>';
         
         // Checkout function
-        echo 'is_checkout() Available: ' . ( function_exists( 'is_checkout' ) ? 'Yes' : 'No' ) . '<br>';
+        echo esc_html__( 'is_checkout() Available:', 'bg8-one-page-checkout' ) . ' ' . ( function_exists( 'is_checkout' ) ? esc_html__( 'Yes', 'bg8-one-page-checkout' ) : esc_html__( 'No', 'bg8-one-page-checkout' ) ) . '<br>';
         
         // Current page
         if ( function_exists( 'is_checkout' ) ) {
-            echo 'Is Checkout Page: ' . ( is_checkout() ? 'Yes' : 'No' ) . '<br>';
+            echo esc_html__( 'Is Checkout Page:', 'bg8-one-page-checkout' ) . ' ' . ( is_checkout() ? esc_html__( 'Yes', 'bg8-one-page-checkout' ) : esc_html__( 'No', 'bg8-one-page-checkout' ) ) . '<br>';
         }
         
         // Plugin constants
-        echo 'BG8_SC_VERSION: ' . ( defined( 'BG8_SC_VERSION' ) ? BG8_SC_VERSION : 'Not defined' ) . '<br>';
-        echo 'BG8_SC_DIR: ' . ( defined( 'BG8_SC_DIR' ) ? BG8_SC_DIR : 'Not defined' ) . '<br>';
-        echo 'BG8_SC_URL: ' . ( defined( 'BG8_SC_URL' ) ? BG8_SC_URL : 'Not defined' ) . '<br>';
+        echo esc_html__( 'BG8_SC_VERSION:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_VERSION' ) ? BG8_SC_VERSION : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
+        echo esc_html__( 'BG8_SC_DIR:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_DIR' ) ? BG8_SC_DIR : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
+        echo esc_html__( 'BG8_SC_URL:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_URL' ) ? BG8_SC_URL : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
         
         // Plugin options
         $options = get_option( 'bg8_sc_options', [] );
-        echo 'Options Count: ' . count( $options ) . '<br>';
+        echo esc_html__( 'Options Count:', 'bg8-one-page-checkout' ) . ' ' . esc_html( count( $options ) ) . '<br>';
         
         // Error log check
         $error_log = ini_get( 'error_log' );
-        echo 'Error Log: ' . ( $error_log ? $error_log : 'Not set' ) . '<br>';
+        echo esc_html__( 'Error Log:', 'bg8-one-page-checkout' ) . ' ' . esc_html( $error_log ? $error_log : esc_html__( 'Not set', 'bg8-one-page-checkout' ) ) . '<br>';
         
-        echo '<br><small>Remove BG8_SC_DEBUG from wp-config.php to hide this.</small>';
+        echo '<br><small>' . esc_html__( 'Remove BG8_SC_DEBUG from wp-config.php to hide this.', 'bg8-one-page-checkout' ) . '</small>';
         echo '</div>';
     }
     
