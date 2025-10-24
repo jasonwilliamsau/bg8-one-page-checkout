@@ -52,8 +52,12 @@ sed -i.bak "/^## \[${NEW_VERSION}\] - $(date +%Y-%m-%d)/a\\
 echo -e "${BLUE}Updating README.md...${NC}"
 sed -i.bak "s/\*\*Version\*\*: .*/\*\*Version\*\*: ${NEW_VERSION}/" README.md
 
+# Update readme.txt stable tag
+echo -e "${BLUE}Updating readme.txt stable tag...${NC}"
+sed -i.bak "s/Stable tag: .*/Stable tag: ${NEW_VERSION}/" readme.txt
+
 # Clean up backup files
-rm -f CHANGELOG.md.bak README.md.bak
+rm -f CHANGELOG.md.bak README.md.bak readme.txt.bak
 
 echo -e "${GREEN}✅ Version bumped successfully to ${NEW_VERSION}${NC}"
 echo ""
