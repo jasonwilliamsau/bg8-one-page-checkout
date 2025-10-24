@@ -68,6 +68,7 @@ class Plugin {
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
             // This error_log is intentionally used for debug purposes only
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug functionality only
             error_log( 'BG8 One Page Checkout CSS injection error: ' . $e->getMessage() );
         }
     }
@@ -103,6 +104,7 @@ class Plugin {
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
             // This error_log is intentionally used for debug purposes only
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug functionality only
             error_log( 'BG8 One Page Checkout header config error: ' . $e->getMessage() );
         }
     }
