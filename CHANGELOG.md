@@ -7,17 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2025-10-27
 
-## [1.2.0] - 2025-10-27
-
-### Added
-- TBD
-
-### Changed
-- TBD
-
-### Fixed
-- TBD
-
 ### Added
 - Pickup / Delivery First option in admin settings
 - Customers can choose between pickup or delivery before entering any information
