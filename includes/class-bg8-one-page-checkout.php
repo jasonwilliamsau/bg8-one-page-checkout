@@ -90,6 +90,7 @@ class Plugin {
         try {
             $checkout_title = self::get_option( 'checkout_title', 'Checkout' );
             $checkout_description = self::get_option( 'checkout_description', 'Complete your purchase in 3 simple steps' );
+            $pickup_delivery_first = self::get_option( 'pickup_delivery_first', false );
             
             // Only show header if at least one field has content
             $show_header = !empty( $checkout_title ) || !empty( $checkout_description );
@@ -98,7 +99,8 @@ class Plugin {
             echo 'window.bg8CheckoutConfig = {';
             echo 'title: ' . json_encode( $checkout_title ) . ',';
             echo 'description: ' . json_encode( $checkout_description ) . ',';
-            echo 'showHeader: ' . ( $show_header ? 'true' : 'false' );
+            echo 'showHeader: ' . ( $show_header ? 'true' : 'false' ) . ',';
+            echo 'pickupDeliveryFirst: ' . ( $pickup_delivery_first ? 'true' : 'false' );
             echo '};';
             echo '</script>';
         } catch ( Exception $e ) {

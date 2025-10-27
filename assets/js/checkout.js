@@ -99,19 +99,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const steps = [];
   const tabs  = [];
+  
+  // Check if pickup/delivery first is enabled
+  const config = window.bg8CheckoutConfig || {};
+  const pickupDeliveryFirst = config.pickupDeliveryFirst === true || config.pickupDeliveryFirst === 'true';
+  let pickupDeliveryChoice = null;
+  
+  // Create pickup/delivery selection step if enabled
+  let pickupDeliveryStep = null;
+  let pickupDeliveryTab = null;
+  if (pickupDeliveryFirst) {
+    pickupDeliveryStep = makeStep('wc-step-pickup-delivery', 'How would you like to receive your order?');
+    const choiceContainer = document.createElement('div');
+    choiceContainer.className = 'wc-pickup-delivery-choice';
+    
+    const pickupBtn = document.createElement('button');
+    pickupBtn.type = 'button';
+    pickupBtn.className = 'wc-choice-btn';
+    pickupBtn.dataset.choice = 'pickup';
+    pickupBtn.innerHTML = '<span class="wc-choice-icon">📦</span><span class="wc-choice-text">Pickup</span><span class="wc-choice-desc">Collect from store</span>';
+    
+    const deliveryBtn = document.createElement('button');
+    deliveryBtn.type = 'button';
+    deliveryBtn.className = 'wc-choice-btn';
+    deliveryBtn.dataset.choice = 'delivery';
+    deliveryBtn.innerHTML = '<span class="wc-choice-icon">🚚</span><span class="wc-choice-text">Delivery</span><span class="wc-choice-desc">Deliver to my address</span>';
+    
+    const handleChoice = (choice) => {
+      pickupDeliveryChoice = choice;
+      pickupBtn.classList.toggle('selected', choice === 'pickup');
+      deliveryBtn.classList.toggle('selected', choice === 'delivery');
+      
+      // Hide "Ship to different address" if pickup
+      const shipToggle = document.querySelector('#ship-to-different-address');
+      if (shipToggle) {
+        if (choice === 'pickup') {
+          shipToggle.style.display = 'none';
+          const checkbox = shipToggle.querySelector('input[type="checkbox"]');
+          if (checkbox) checkbox.checked = false;
+        } else {
+          shipToggle.style.display = '';
+        }
+      }
+      
+      // Make delivery button active
+      if (choice === 'pickup') {
+        deliveryBtn.disabled = false;
+      } else {
+        deliveryBtn.disabled = false;
+      }
+    };
+    
+    pickupBtn.addEventListener('click', () => handleChoice('pickup'));
+    deliveryBtn.addEventListener('click', () => handleChoice('delivery'));
+    
+    choiceContainer.append(pickupBtn, deliveryBtn);
+    pickupDeliveryStep.body.append(choiceContainer);
+    steps.push(pickupDeliveryStep.panel);
+    pickupDeliveryTab = makeTab('wc-step-pickup-delivery', 'Choose', 0);
+    tabs.push(pickupDeliveryTab);
+  }
 
   // Step 1 — Your details (billing)
   const step1 = makeStep('wc-step-billing', 'Enter your details');
   if (billingFields) step1.body.append(billingFields);
   if (additionalFields) step1.body.append(additionalFields);
   steps.push(step1.panel);
-  tabs.push(makeTab('wc-step-billing', 'Your details', 0));
+  tabs.push(makeTab('wc-step-billing', 'Your details', pickupDeliveryFirst ? 1 : 0));
 
   // Step 2 — Recipient (shipping)
   const step2 = makeStep('wc-step-shipping', 'Recipient details');
   if (shippingFields) step2.body.append(shippingFields);
   steps.push(step2.panel);
-  tabs.push(makeTab('wc-step-shipping', 'Recipient', 1));
+  tabs.push(makeTab('wc-step-shipping', 'Recipient', pickupDeliveryFirst ? 2 : 1));
 
   // Step 3 — Confirm (order review + shipping methods + payment)
   const step3 = makeStep('wc-step-confirm', 'Confirm your Order', []);
@@ -136,15 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   steps.push(step3.panel);
-  tabs.push(makeTab('wc-step-confirm', 'Confirm', 2));
+  tabs.push(makeTab('wc-step-confirm', 'Confirm', pickupDeliveryFirst ? 3 : 2));
 
   // Assemble
   tabs.forEach(t => stepsIndicator.append(t.step));
   content.append(errSummary);
   steps.forEach(s => content.append(s));
   
-  // Configure header from PHP settings
-  const config = window.bg8CheckoutConfig || {};
+  // Configure header from PHP settings (already defined above)
   const titleEl = header.querySelector('.wc-checkout-title');
   const descEl = header.querySelector('.wc-checkout-subtitle');
   
@@ -163,6 +222,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Controls
   const addActions = (panel, index) => {
     const actions = panel.querySelector('.wc-checkout-actions');
+    
+    // Special handling for pickup/delivery step
+    if (pickupDeliveryStep && panel === pickupDeliveryStep.panel) {
+      actions.innerHTML = ''; // Clear default actions
+      const next = document.createElement('button');
+      next.type = 'button';
+      next.className = 'wc-btn wc-btn-primary';
+      next.textContent = 'Continue →';
+      next.disabled = !pickupDeliveryChoice;
+      next.addEventListener('click', () => {
+        if (!pickupDeliveryChoice) return;
+        if (window.jQuery) window.jQuery(document.body).trigger('update_checkout');
+        goTo(index + 1);
+      });
+      actions.append(next);
+      return;
+    }
+    
     if (index > 0) {
       const back = document.createElement('button');
       back.type = 'button';
@@ -227,14 +304,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const shipToggle = document.querySelector('#ship-to-different-address input[type="checkbox"]');
     const shippingRequired = !!document.querySelector('.woocommerce-shipping-fields');
     const shippingAddressVisible = shippingRequired && shipToggle && shipToggle.checked;
-
-    if (idx === 1 && (virtualOnly || !shippingAddressVisible)) return 2;
+    
+    // If pickup/delivery first is enabled, skip shipping step if pickup was chosen
+    if (pickupDeliveryFirst) {
+      // Adjust indices - step 2 is now shipping (was step 1)
+      if (idx === 2 && (virtualOnly || !shippingAddressVisible || pickupDeliveryChoice === 'pickup')) {
+        return 3;
+      }
+    } else {
+      // Original logic
+      if (idx === 1 && (virtualOnly || !shippingAddressVisible)) return 2;
+    }
     return idx;
   }
 
   function validateStep(panel) {
     errSummary.hidden = true;
     const list = errSummary.querySelector('ul'); list.innerHTML = '';
+    
+    // Skip validation for pickup/delivery step - it's handled by button disabled state
+    if (pickupDeliveryStep && panel === pickupDeliveryStep.panel) {
+      return true;
+    }
+    
     const requiredVisible = Array.from(panel.querySelectorAll('input,select,textarea'))
       .filter(el => el.closest('[hidden]') === null)
       .filter(el => el.hasAttribute('required') || el.classList.contains('validate-required'));
@@ -283,17 +375,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const m = (location.hash || '').match(/#step-(\d+)/);
   const start = m ? Math.max(0, Math.min(steps.length - 1, parseInt(m[1], 10) - 1)) : 0;
   goTo(start);
+  
+  // Update button disabled state for pickup/delivery step
+  if (pickupDeliveryStep) {
+    const observeChoiceButtons = () => {
+      const continueBtn = pickupDeliveryStep.actions.querySelector('.wc-btn-primary');
+      if (continueBtn) {
+        continueBtn.disabled = !pickupDeliveryChoice;
+      }
+    };
+    
+    // Observe changes to pickupDeliveryChoice
+    const choiceObserver = new MutationObserver(observeChoiceButtons);
+    choiceObserver.observe(pickupDeliveryStep.panel, { childList: true, subtree: true });
+    
+    // Also listen for button clicks
+    pickupDeliveryStep.panel.querySelectorAll('.wc-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setTimeout(observeChoiceButtons, 100);
+      });
+    });
+  }
 
   // Reveal with cross-fade: swap wc-prep -> wc-ready and focus first name
   document.documentElement.classList.remove('wc-prep');
   document.documentElement.classList.add('wc-ready');
 
-  const focusTarget =
-    document.querySelector('#billing_first_name') ||
-    document.querySelector('#billing_firstname') ||
-    document.querySelector('[name="billing_first_name"]') ||
-    document.querySelector('[name="billing_firstname"]') ||
-    step1.panel.querySelector('input, select, textarea');
+  let focusTarget = null;
+  if (pickupDeliveryStep && pickupDeliveryChoice === null) {
+    focusTarget = pickupDeliveryStep.panel.querySelector('.wc-choice-btn');
+  } else {
+    focusTarget =
+      document.querySelector('#billing_first_name') ||
+      document.querySelector('#billing_firstname') ||
+      document.querySelector('[name="billing_first_name"]') ||
+      document.querySelector('[name="billing_firstname"]') ||
+      step1.panel.querySelector('input, select, textarea');
+  }
 
   setTimeout(() => { focusTarget && focusTarget.focus(); }, 30);
 

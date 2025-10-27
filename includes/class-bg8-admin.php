@@ -169,6 +169,23 @@ class Admin {
             'bg8_sc_header',
             [ 'field' => 'checkout_description', 'default' => 'Complete your purchase in 3 simple steps' ]
         );
+
+        // Checkout Options section
+        add_settings_section(
+            'bg8_sc_options',
+            '', // Empty title to prevent duplicate headings
+            [ __CLASS__, 'options_section_callback' ],
+            'bg8-one-page-checkout'
+        );
+
+        add_settings_field(
+            'pickup_delivery_first',
+            __( 'Pickup / Delivery First', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'checkbox_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_options',
+            [ 'field' => 'pickup_delivery_first', 'default' => false ]
+        );
     }
 
     /**
@@ -191,6 +208,13 @@ class Admin {
             if ( isset( $input[ $field ] ) ) {
                 $sanitized[ $field ] = sanitize_text_field( $input[ $field ] );
             }
+        }
+
+        // Sanitize checkbox fields
+        if ( isset( $input['pickup_delivery_first'] ) ) {
+            $sanitized['pickup_delivery_first'] = (bool) $input['pickup_delivery_first'];
+        } else {
+            $sanitized['pickup_delivery_first'] = false;
         }
 
         return $sanitized;
@@ -221,6 +245,14 @@ class Admin {
     }
 
     /**
+     * Options section callback
+     */
+    public static function options_section_callback() {
+        echo '<div class="bg8-section-title">' . esc_html__( 'Checkout Options', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Configure how the checkout flow works.', 'bg8-one-page-checkout' ) . '</p>';
+    }
+
+    /**
      * Color field callback
      */
     public static function color_field_callback( $args ) {
@@ -241,6 +273,18 @@ class Admin {
         echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" />';
         // translators: %s is the default text value
         echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
+    }
+
+    /**
+     * Checkbox field callback
+     */
+    public static function checkbox_field_callback( $args ) {
+        $options = get_option( self::OPTION_NAME, [] );
+        $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
+        
+        echo '<input type="checkbox" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="1" ' . checked( $value, true, false ) . ' class="bg8-checkbox" />';
+        echo '<label for="' . esc_attr( $args['field'] ) . '">' . esc_html__( 'Show pickup/delivery selection before billing information', 'bg8-one-page-checkout' ) . '</label>';
+        echo '<p class="bg8-description">' . esc_html__( 'Enable this to let customers choose pickup or delivery first. Pickup only requires billing info; delivery requires both billing and shipping info.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
@@ -426,6 +470,9 @@ class Admin {
                     document.getElementById("step_3_heading").value = "Review your order";
                     document.getElementById("checkout_title").value = "Checkout";
                     document.getElementById("checkout_description").value = "Complete your purchase in 3 simple steps";
+                    
+                    // Reset checkbox
+                    document.getElementById("pickup_delivery_first").checked = false;
                     
                     alert("Settings have been reset to defaults. Click Save Changes to apply them.");
                 }

@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Pickup / Delivery First option in admin settings
+- Customers can choose between pickup or delivery before entering any information
+- Pickup option only requires billing information
+- Delivery option requires both billing and shipping information
+- Beautiful card-based selection interface for pickup/delivery choice
+- Automatic step skipping based on selection
+- Mobile-responsive pickup/delivery selection buttons
+
+### Changed
+- Enhanced checkout flow to accommodate pickup/delivery selection
+- Improved UX by collecting delivery method preference early
+- Better support for businesses offering both pickup and delivery options
+
+## [1.1.11] - 2024-01-15
+
+### Added
+- Complete release automation script (`release.sh`)
+- Enhanced deployment documentation
+- Reset to Defaults button in admin settings
+
 ## [1.1.5] - 2025-10-23
 
 ### Added
