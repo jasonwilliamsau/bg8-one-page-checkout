@@ -3,7 +3,7 @@
  * Plugin Name: BG8 One Page Checkout
  * Plugin URI: https://github.com/jasonwilliamsau/bg8-one-page-checkout
  * Description: Converts WooCommerce checkout into a 3-step, single-column, accessible stepper with brand styling, pre-paint overlay, and improved UX. Includes admin configuration for colors and labels.
- * Version: 1.2.5
+ * Version: 1.2.6
  * Author: Blackgate
  * Author URI: https://blackgate.com.au
  * License: GPL-2.0+
@@ -22,7 +22,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'BG8_SC_VERSION', '1.2.5' );
+define( 'BG8_SC_VERSION', '1.2.6' );
 define( 'BG8_SC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BG8_SC_URL', plugin_dir_url( __FILE__ ) );
 
