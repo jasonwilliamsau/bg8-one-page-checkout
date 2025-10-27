@@ -181,10 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         step2.panel.style.display = 'none';
         step2.panel.classList.add('hidden-step');
       } else {
-        // Remove hidden class and clear any inline display styles
+        // Remove hidden class - goTo will handle display
         step2.panel.classList.remove('hidden-step');
-        step2.panel.style.display = ''; // Clear inline display
-        // Note: goTo will set display: block when navigating to this step
       }
     }
     
@@ -195,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         recipientTab.step.style.display = 'none';
         recipientTab.step.classList.add('hidden-tab');
       } else {
-        recipientTab.step.style.display = '';
         recipientTab.step.style.removeProperty('display');
         recipientTab.step.classList.remove('hidden-tab');
       }
@@ -371,15 +368,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     steps.forEach((panel, i) => { 
       panel.classList.toggle('active', i === idx);
-      // Only show if it's the target index AND not hidden
-      const shouldShow = i === idx && !panel.classList.contains('hidden-step');
-      if (shouldShow) {
+      
+      const isHidden = panel.classList.contains('hidden-step');
+      const isCurrent = i === idx;
+      
+      // Show current step if not hidden, hide everything else
+      if (isCurrent && !isHidden) {
         panel.style.display = 'block';
       } else {
-        // Only set display:none if not hidden-step (to preserve visibility after choice change)
-        if (!panel.classList.contains('hidden-step')) {
-          panel.style.display = 'none';
-        }
+        panel.style.display = 'none';
       }
     });
     current = idx;
