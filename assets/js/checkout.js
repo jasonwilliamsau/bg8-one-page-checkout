@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pickupBtn.type = 'button';
     pickupBtn.className = 'wc-choice-btn';
     pickupBtn.dataset.choice = 'pickup';
-    pickupBtn.innerHTML = '<span class="wc-choice-icon">📦</span><span class="wc-choice-text">Pickup</span><span class="wc-choice-desc">Collect from store</span>';
+    pickupBtn.innerHTML = '<span class="wc-choice-icon">💐</span><span class="wc-choice-text">Pickup</span><span class="wc-choice-desc">Collect from store</span>';
     
     const deliveryBtn = document.createElement('button');
     deliveryBtn.type = 'button';
@@ -129,6 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
       pickupDeliveryChoice = choice;
       pickupBtn.classList.toggle('selected', choice === 'pickup');
       deliveryBtn.classList.toggle('selected', choice === 'delivery');
+      
+      // Update recipient step visibility
+      updateRecipientStepVisibility(choice);
       
       // Hide "Ship to different address" if pickup
       const shipToggle = document.querySelector('#ship-to-different-address');
@@ -158,7 +161,56 @@ document.addEventListener('DOMContentLoaded', () => {
     steps.push(pickupDeliveryStep.panel);
     pickupDeliveryTab = makeTab('wc-step-pickup-delivery', 'Choose', 0);
     tabs.push(pickupDeliveryTab);
+    
+    // Pre-select delivery
+    pickupDeliveryChoice = 'delivery';
+    handleChoice('delivery');
   }
+  
+  // Function to update recipient step visibility based on pickup/delivery choice
+  function updateRecipientStepVisibility(choice) {
+    if (!pickupDeliveryFirst || !step2) return;
+    
+    const isPickup = choice === 'pickup';
+    
+    // Hide/show the recipient step panel
+    if (step2.panel.parentNode) {
+      if (isPickup) {
+        step2.panel.style.display = 'none';
+        step2.panel.classList.add('hidden-step');
+      } else {
+        step2.panel.style.display = '';
+        step2.panel.classList.remove('hidden-step');
+      }
+    }
+    
+    // Hide/show the recipient tab
+    const recipientTab = tabs[pickupDeliveryFirst ? 2 : 1];
+    if (recipientTab) {
+      if (isPickup) {
+        recipientTab.step.style.display = 'none';
+      } else {
+        recipientTab.step.style.display = 'flex';
+      }
+    }
+    
+    // Update step numbers for visible steps
+    let stepNumber = 1;
+    tabs.forEach((tab, index) => {
+      if (!tab.step.style.display || tab.step.style.display !== 'none') {
+        tab.number.textContent = stepNumber;
+        stepNumber++;
+      }
+    });
+  }
+  
+  // Initialize recipient step visibility after all steps are created
+  // Use setTimeout to ensure DOM is ready
+  setTimeout(() => {
+    if (pickupDeliveryFirst && step2 && pickupDeliveryChoice) {
+      updateRecipientStepVisibility(pickupDeliveryChoice);
+    }
+  }, 100);
 
   // Step 1 — Your details (billing)
   const step1 = makeStep('wc-step-billing', 'Enter your details');
@@ -245,7 +297,16 @@ document.addEventListener('DOMContentLoaded', () => {
       back.type = 'button';
       back.className = 'wc-btn wc-btn-secondary';
       back.textContent = '← Back';
-      back.addEventListener('click', () => goTo(index - 1));
+      back.addEventListener('click', () => {
+        // Find the previous visible step
+        let prevIdx = index - 1;
+        while (prevIdx >= 0 && steps[prevIdx].classList.contains('hidden-step')) {
+          prevIdx--;
+        }
+        if (prevIdx >= 0) {
+          goTo(prevIdx);
+        }
+      });
       actions.append(back);
     } else {
       actions.append(document.createElement('span'));
@@ -257,7 +318,16 @@ document.addEventListener('DOMContentLoaded', () => {
     next.addEventListener('click', () => {
       if (!validateStep(steps[index])) return;
       if (index < steps.length - 1) {
-        goTo(index + 1);
+        // Find the next visible step
+        let nextIdx = index + 1;
+        while (nextIdx < steps.length && steps[nextIdx].classList.contains('hidden-step')) {
+          nextIdx++;
+        }
+        if (nextIdx < steps.length) {
+          goTo(nextIdx);
+        } else {
+          checkoutForm.requestSubmit();
+        }
         if (window.jQuery) window.jQuery(document.body).trigger('update_checkout');
       } else {
         checkoutForm.requestSubmit();
@@ -273,13 +343,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function goTo(idx) {
     idx = computeSkips(idx);
 
-    tabs.forEach(({ step }, i) => {
-      step.classList.toggle('active', i === idx);
-      step.classList.toggle('completed', i < idx);
+    // Get actual indices accounting for hidden steps
+    const visibleIndices = [];
+    tabs.forEach((tab, i) => {
+      if (!tab.step.classList.contains('hidden-step') && 
+          (!tab.step.style.display || tab.step.style.display !== 'none')) {
+        visibleIndices.push(i);
+      }
     });
+
+    tabs.forEach(({ step }, i) => {
+      const isVisible = !step.classList.contains('hidden-step') && 
+                       (!step.style.display || step.style.display !== 'none');
+      step.classList.toggle('active', i === idx && isVisible);
+      step.classList.toggle('completed', i < idx && isVisible);
+    });
+    
     steps.forEach((panel, i) => { 
-      panel.classList.toggle('active', i === idx);
-      panel.style.display = i === idx ? 'block' : 'none';
+      const isVisible = !panel.classList.contains('hidden-step') && 
+                       (!panel.style.display || panel.style.display !== 'none');
+      panel.classList.toggle('active', i === idx && isVisible);
+      panel.style.display = (i === idx && isVisible) ? 'block' : 'none';
     });
     current = idx;
     document.body.classList.toggle('wc-step--confirm-active', current === 2);
@@ -300,21 +384,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function computeSkips(idx) {
+    // If pickup/delivery first is enabled and pickup is chosen, skip the shipping step
+    if (pickupDeliveryFirst && pickupDeliveryChoice === 'pickup') {
+      // When coming from billing (step 1), go to confirm (step 3) instead of shipping (step 2)
+      if (idx === 2) return 3;
+    }
+    
     const virtualOnly = !needsShipping();
     const shipToggle = document.querySelector('#ship-to-different-address input[type="checkbox"]');
     const shippingRequired = !!document.querySelector('.woocommerce-shipping-fields');
     const shippingAddressVisible = shippingRequired && shipToggle && shipToggle.checked;
     
-    // If pickup/delivery first is enabled, skip shipping step if pickup was chosen
-    if (pickupDeliveryFirst) {
-      // Adjust indices - step 2 is now shipping (was step 1)
-      if (idx === 2 && (virtualOnly || !shippingAddressVisible || pickupDeliveryChoice === 'pickup')) {
-        return 3;
-      }
-    } else {
-      // Original logic
-      if (idx === 1 && (virtualOnly || !shippingAddressVisible)) return 2;
+    // Original logic for virtual orders or when "ship to different address" is unchecked
+    if (idx === (pickupDeliveryFirst ? 2 : 1) && (virtualOnly || !shippingAddressVisible)) {
+      return idx + 1;
     }
+    
     return idx;
   }
 

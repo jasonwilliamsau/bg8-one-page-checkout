@@ -242,6 +242,10 @@ body.woocommerce-checkout {
   border-top: 1px solid var(--bg8-border-light);
 }
 
+.wc-checkout-actions:has(> .wc-btn-primary:only-child) {
+  justify-content: flex-end;
+}
+
 .wc-btn {
   padding: 12px 24px;
   border: none;
