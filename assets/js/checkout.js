@@ -181,25 +181,32 @@ document.addEventListener('DOMContentLoaded', () => {
         step2.panel.style.display = 'none';
         step2.panel.classList.add('hidden-step');
       } else {
-        step2.panel.style.display = '';
+        // Remove hidden class and clear any inline display styles
         step2.panel.classList.remove('hidden-step');
+        // Don't set display here - let goTo function handle it
       }
     }
     
-    // Hide/show the recipient tab
+    // Hide/show the recipient tab indicator
     const recipientTab = tabs[pickupDeliveryFirst ? 2 : 1];
     if (recipientTab) {
       if (isPickup) {
         recipientTab.step.style.display = 'none';
+        recipientTab.step.classList.add('hidden-tab');
       } else {
-        recipientTab.step.style.display = 'flex';
+        recipientTab.step.style.display = '';
+        recipientTab.step.style.removeProperty('display');
+        recipientTab.step.classList.remove('hidden-tab');
       }
     }
     
     // Update step numbers for visible steps
     let stepNumber = 1;
     tabs.forEach((tab, index) => {
-      if (!tab.step.style.display || tab.step.style.display !== 'none') {
+      // Check both display style and hidden-tab class
+      const isHidden = tab.step.classList.contains('hidden-tab') || 
+                      tab.step.style.display === 'none';
+      if (!isHidden) {
         tab.number.textContent = stepNumber;
         stepNumber++;
       }
