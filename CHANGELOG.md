@@ -5,29 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.1] - 2025-10-27
-
-## [1.2.1] - 2025-10-27
-
-### Added
-- TBD
-
-### Changed
-- TBD
+## [1.2.2] - 2025-10-27
 
 ### Fixed
-- TBD
-
-### Added
-- TBD
-
-### Changed
-- TBD
-
-### Fixed
-- TBD
+- Improved pickup/delivery UX:
+  - Changed pickup icon to vase of flowers 💐
+  - Pre-select Delivery option by default
+  - Right-align Continue button on first step
+  - Hide Recipient step when Pickup is selected
+  - Update step numbers to reflect hidden steps
+  - Fix Back button to navigate to previous visible step
+  - Fix Continue button to skip hidden steps
+  - Improve step skipping logic for pickup vs delivery
 
 ## [1.2.1] - 2025-10-27
+
+### Fixed
+- Bootstrap/jQuery console errors in admin page
+- Missing color input fields in admin settings  
+- Admin asset enqueue now properly registers styles and scripts
 
 ## [1.2.1] - 2025-10-27
 
