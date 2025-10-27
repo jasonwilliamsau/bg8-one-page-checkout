@@ -357,17 +357,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     tabs.forEach(({ step }, i) => {
-      const isVisible = !step.classList.contains('hidden-step') && 
-                       (!step.style.display || step.style.display !== 'none');
-      step.classList.toggle('active', i === idx && isVisible);
-      step.classList.toggle('completed', i < idx && isVisible);
+      step.classList.toggle('active', i === idx);
+      step.classList.toggle('completed', i < idx);
     });
     
     steps.forEach((panel, i) => { 
-      const isVisible = !panel.classList.contains('hidden-step') && 
-                       (!panel.style.display || panel.style.display !== 'none');
-      panel.classList.toggle('active', i === idx && isVisible);
-      panel.style.display = (i === idx && isVisible) ? 'block' : 'none';
+      panel.classList.toggle('active', i === idx);
+      // Only show if it's the target index AND not hidden
+      const shouldShow = i === idx && !panel.classList.contains('hidden-step');
+      panel.style.display = shouldShow ? 'block' : 'none';
     });
     current = idx;
     document.body.classList.toggle('wc-step--confirm-active', current === 2);
