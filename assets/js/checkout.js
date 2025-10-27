@@ -125,13 +125,15 @@ document.addEventListener('DOMContentLoaded', () => {
     deliveryBtn.dataset.choice = 'delivery';
     deliveryBtn.innerHTML = '<span class="wc-choice-icon">🚚</span><span class="wc-choice-text">Delivery</span><span class="wc-choice-desc">Deliver to my address</span>';
     
-    const handleChoice = (choice) => {
+    const handleChoice = (choice, skipVisibilityUpdate = false) => {
       pickupDeliveryChoice = choice;
       pickupBtn.classList.toggle('selected', choice === 'pickup');
       deliveryBtn.classList.toggle('selected', choice === 'delivery');
       
-      // Update recipient step visibility
-      updateRecipientStepVisibility(choice);
+      // Update recipient step visibility (but skip if step2 not ready yet)
+      if (!skipVisibilityUpdate) {
+        updateRecipientStepVisibility(choice);
+      }
       
       // Hide "Ship to different address" if pickup
       const shipToggle = document.querySelector('#ship-to-different-address');
@@ -162,9 +164,9 @@ document.addEventListener('DOMContentLoaded', () => {
     pickupDeliveryTab = makeTab('wc-step-pickup-delivery', 'Choose', 0);
     tabs.push(pickupDeliveryTab);
     
-    // Pre-select delivery
+    // Pre-select delivery (skip visibility update until step2 is created)
     pickupDeliveryChoice = 'delivery';
-    handleChoice('delivery');
+    handleChoice('delivery', true);
   }
   
   // Function to update recipient step visibility based on pickup/delivery choice
@@ -206,11 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Initialize recipient step visibility after all steps are created
   // Use setTimeout to ensure DOM is ready
-  setTimeout(() => {
-    if (pickupDeliveryFirst && step2 && pickupDeliveryChoice) {
-      updateRecipientStepVisibility(pickupDeliveryChoice);
-    }
-  }, 100);
+  if (pickupDeliveryFirst) {
+    setTimeout(() => {
+      if (step2 && pickupDeliveryChoice) {
+        updateRecipientStepVisibility(pickupDeliveryChoice);
+      }
+    }, 100);
+  }
 
   // Step 1 — Your details (billing)
   const step1 = makeStep('wc-step-billing', 'Enter your details');
