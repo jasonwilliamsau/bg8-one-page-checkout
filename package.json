@@ -1,6 +1,6 @@
 {
   "name": "bg8-one-page-checkout",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Converts WooCommerce checkout into a 3-step, single-column, accessible stepper with brand styling, pre-paint overlay, and improved UX. Includes admin configuration for colors and labels.",
   "main": "bg8-one-page-checkout.php",
   "scripts": {
