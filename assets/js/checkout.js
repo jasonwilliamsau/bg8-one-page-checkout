@@ -404,6 +404,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (idx === 2) return 3;
     }
     
+    // If pickup/delivery first is enabled and delivery is chosen, always show the shipping step
+    if (pickupDeliveryFirst && pickupDeliveryChoice === 'delivery') {
+      // Don't skip the recipient step when delivery is selected
+      return idx;
+    }
+    
     const virtualOnly = !needsShipping();
     const shipToggle = document.querySelector('#ship-to-different-address input[type="checkbox"]');
     const shippingRequired = !!document.querySelector('.woocommerce-shipping-fields');
