@@ -259,6 +259,7 @@ class Admin {
         $options = get_option( self::OPTION_NAME, [] );
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
         
+        echo '<input type="color" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-color-picker" />';
         // translators: %s is the default color value
         echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
@@ -331,10 +332,12 @@ class Admin {
             return;
         }
 
-        // Using native HTML5 color picker instead of WordPress color picker
+        // Register and enqueue admin stylesheet with inline styles
+        wp_register_style( 'bg8-admin-style', '' );
+        wp_enqueue_style( 'bg8-admin-style' );
         
         // Add custom admin styling
-        wp_add_inline_style( 'admin-bar', '
+        wp_add_inline_style( 'bg8-admin-style', '
             /* Hide admin notices on our page */
             .bg8-admin-page .notice {
                 display: none !important;
@@ -412,6 +415,9 @@ class Admin {
                 color: #666;
                 margin-top: 5px;
             }
+            .bg8-checkbox {
+                margin-right: 8px;
+            }
             .bg8-button-primary {
                 background: #d4127c;
                 color: white;
@@ -451,8 +457,12 @@ class Admin {
         
         // Native HTML5 color picker - no JavaScript needed
         
+        // Register and enqueue admin script
+        wp_register_script( 'bg8-admin-script', '', array(), BG8_SC_VERSION, true );
+        wp_enqueue_script( 'bg8-admin-script' );
+        
         // Add reset to defaults functionality
-        wp_add_inline_script( 'admin-bar', '
+        wp_add_inline_script( 'bg8-admin-script', '
             function resetToDefaults() {
                 if (confirm("Are you sure you want to reset all settings to their default values? This cannot be undone.")) {
                     // Reset color fields
