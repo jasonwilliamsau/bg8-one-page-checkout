@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.2] - 2025-10-27
 
+## [1.2.2] - 2025-10-27
+
+### Added
+- TBD
+
+### Changed
+- TBD
+
+### Fixed
+- TBD
+
 ### Fixed
 - Improved pickup/delivery UX:
   - Changed pickup icon to vase of flowers 💐
