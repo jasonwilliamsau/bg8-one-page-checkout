@@ -373,7 +373,14 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.classList.toggle('active', i === idx);
       // Only show if it's the target index AND not hidden
       const shouldShow = i === idx && !panel.classList.contains('hidden-step');
-      panel.style.display = shouldShow ? 'block' : 'none';
+      if (shouldShow) {
+        panel.style.display = 'block';
+      } else {
+        // Only set display:none if not hidden-step (to preserve visibility after choice change)
+        if (!panel.classList.contains('hidden-step')) {
+          panel.style.display = 'none';
+        }
+      }
     });
     current = idx;
     document.body.classList.toggle('wc-step--confirm-active', current === 2);
