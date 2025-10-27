@@ -181,9 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         step2.panel.style.display = 'none';
         step2.panel.classList.add('hidden-step');
       } else {
-        // Remove hidden class and clear any inline display styles
+        // Remove hidden class and reset display
         step2.panel.classList.remove('hidden-step');
-        // Don't set display here - let goTo function handle it
+        // Don't force display here - only set it when navigating to that step
+        // The goTo function will handle showing it
       }
     }
     
