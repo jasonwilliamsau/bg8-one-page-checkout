@@ -147,6 +147,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       
+      // Pre-select the correct shipping method
+      const shippingMethods = document.querySelectorAll('input[name^="shipping_method"]');
+      if (shippingMethods.length > 0) {
+        let targetMethod = null;
+        
+        shippingMethods.forEach(method => {
+          const methodId = method.value || method.id || '';
+          const methodLabel = method.parentElement?.textContent || '';
+          
+          if (choice === 'pickup') {
+            // Look for local_pickup or similar
+            if (methodId.includes('local_pickup') || methodId.includes('pickup') || 
+                methodLabel.toLowerCase().includes('pickup') || methodLabel.toLowerCase().includes('collection')) {
+              targetMethod = method;
+            }
+          } else {
+            // Look for delivery methods (not pickup)
+            if (!methodId.includes('local_pickup') && !methodId.includes('pickup') &&
+                !methodLabel.toLowerCase().includes('pickup') && !methodLabel.toLowerCase().includes('collection')) {
+              if (!targetMethod) { // Select first non-pickup method
+                targetMethod = method;
+              }
+            }
+          }
+        });
+        
+        // Select the target method if found
+        if (targetMethod && !targetMethod.checked) {
+          targetMethod.checked = true;
+          targetMethod.click(); // Trigger click to ensure WooCommerce processes it
+          
+          // Trigger WooCommerce checkout update
+          if (window.jQuery) {
+            window.jQuery(document.body).trigger('update_checkout');
+          }
+        }
+      }
+      
       // Make delivery button active
       if (choice === 'pickup') {
         deliveryBtn.disabled = false;
