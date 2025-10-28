@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if pickup/delivery first is enabled
   const config = window.bg8CheckoutConfig || {};
   const pickupDeliveryFirst = config.pickupDeliveryFirst === true || config.pickupDeliveryFirst === 'true';
+  const pickupShippingMethod = config.pickupShippingMethod || '';
+  const deliveryShippingMethod = config.deliveryShippingMethod || '';
   let pickupDeliveryChoice = null;
   
   // Create pickup/delivery selection step if enabled
@@ -152,26 +154,40 @@ document.addEventListener('DOMContentLoaded', () => {
       if (shippingMethods.length > 0) {
         let targetMethod = null;
         
-        shippingMethods.forEach(method => {
-          const methodId = method.value || method.id || '';
-          const methodLabel = method.parentElement?.textContent || '';
-          
-          if (choice === 'pickup') {
-            // Look for local_pickup or similar
-            if (methodId.includes('local_pickup') || methodId.includes('pickup') || 
-                methodLabel.toLowerCase().includes('pickup') || methodLabel.toLowerCase().includes('collection')) {
+        // Check if admin has configured specific shipping methods
+        const configuredMethod = choice === 'pickup' ? pickupShippingMethod : deliveryShippingMethod;
+        
+        if (configuredMethod) {
+          // Use the admin-configured shipping method
+          shippingMethods.forEach(method => {
+            const methodValue = method.value || '';
+            if (methodValue === configuredMethod) {
               targetMethod = method;
             }
-          } else {
-            // Look for delivery methods (not pickup)
-            if (!methodId.includes('local_pickup') && !methodId.includes('pickup') &&
-                !methodLabel.toLowerCase().includes('pickup') && !methodLabel.toLowerCase().includes('collection')) {
-              if (!targetMethod) { // Select first non-pickup method
+          });
+        } else {
+          // Auto-detect shipping method
+          shippingMethods.forEach(method => {
+            const methodId = method.value || method.id || '';
+            const methodLabel = method.parentElement?.textContent || '';
+            
+            if (choice === 'pickup') {
+              // Look for local_pickup or similar
+              if (methodId.includes('local_pickup') || methodId.includes('pickup') || 
+                  methodLabel.toLowerCase().includes('pickup') || methodLabel.toLowerCase().includes('collection')) {
                 targetMethod = method;
               }
+            } else {
+              // Look for delivery methods (not pickup)
+              if (!methodId.includes('local_pickup') && !methodId.includes('pickup') &&
+                  !methodLabel.toLowerCase().includes('pickup') && !methodLabel.toLowerCase().includes('collection')) {
+                if (!targetMethod) { // Select first non-pickup method
+                  targetMethod = method;
+                }
+              }
             }
-          }
-        });
+          });
+        }
         
         // Select the target method if found
         if (targetMethod && !targetMethod.checked) {

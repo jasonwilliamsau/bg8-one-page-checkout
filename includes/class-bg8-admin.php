@@ -186,6 +186,24 @@ class Admin {
             'bg8_sc_options',
             [ 'field' => 'pickup_delivery_first', 'default' => false ]
         );
+
+        add_settings_field(
+            'pickup_shipping_method',
+            __( 'Pickup Shipping Method', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'shipping_method_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_options',
+            [ 'field' => 'pickup_shipping_method', 'default' => '', 'type' => 'pickup' ]
+        );
+
+        add_settings_field(
+            'delivery_shipping_method',
+            __( 'Delivery Shipping Method', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'shipping_method_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_options',
+            [ 'field' => 'delivery_shipping_method', 'default' => '', 'type' => 'delivery' ]
+        );
     }
 
     /**
@@ -215,6 +233,14 @@ class Admin {
             $sanitized['pickup_delivery_first'] = (bool) $input['pickup_delivery_first'];
         } else {
             $sanitized['pickup_delivery_first'] = false;
+        }
+
+        // Sanitize shipping method fields
+        if ( isset( $input['pickup_shipping_method'] ) ) {
+            $sanitized['pickup_shipping_method'] = sanitize_text_field( $input['pickup_shipping_method'] );
+        }
+        if ( isset( $input['delivery_shipping_method'] ) ) {
+            $sanitized['delivery_shipping_method'] = sanitize_text_field( $input['delivery_shipping_method'] );
         }
 
         return $sanitized;
@@ -286,6 +312,73 @@ class Admin {
         echo '<input type="checkbox" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="1" ' . checked( $value, true, false ) . ' class="bg8-checkbox" />';
         echo '<label for="' . esc_attr( $args['field'] ) . '">' . esc_html__( 'Show pickup/delivery selection before billing information', 'bg8-one-page-checkout' ) . '</label>';
         echo '<p class="bg8-description">' . esc_html__( 'Enable this to let customers choose pickup or delivery first. Pickup only requires billing info; delivery requires both billing and shipping info.', 'bg8-one-page-checkout' ) . '</p>';
+    }
+
+    /**
+     * Shipping method field callback
+     */
+    public static function shipping_method_field_callback( $args ) {
+        $options = get_option( self::OPTION_NAME, [] );
+        $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
+        
+        // Get available shipping methods
+        $shipping_methods = self::get_shipping_methods();
+        
+        echo '<select id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" class="bg8-select">';
+        echo '<option value="">' . esc_html__( 'Auto-detect (recommended)', 'bg8-one-page-checkout' ) . '</option>';
+        
+        foreach ( $shipping_methods as $method_id => $method_title ) {
+            echo '<option value="' . esc_attr( $method_id ) . '" ' . selected( $value, $method_id, false ) . '>' . esc_html( $method_title ) . '</option>';
+        }
+        
+        echo '</select>';
+        
+        if ( $args['type'] === 'pickup' ) {
+            echo '<p class="bg8-description">' . esc_html__( 'Select the shipping method to use when customer chooses pickup. Leave as "Auto-detect" to automatically find local pickup methods.', 'bg8-one-page-checkout' ) . '</p>';
+        } else {
+            echo '<p class="bg8-description">' . esc_html__( 'Select the shipping method to use when customer chooses delivery. Leave as "Auto-detect" to automatically select the first non-pickup method.', 'bg8-one-page-checkout' ) . '</p>';
+        }
+    }
+
+    /**
+     * Get available shipping methods
+     */
+    private static function get_shipping_methods() {
+        $methods = [];
+        
+        if ( ! class_exists( 'WC_Shipping_Zones' ) ) {
+            return $methods;
+        }
+        
+        // Get all shipping zones
+        $zones = WC_Shipping_Zones::get_zones();
+        
+        // Add methods from each zone
+        foreach ( $zones as $zone ) {
+            if ( isset( $zone['shipping_methods'] ) && is_array( $zone['shipping_methods'] ) ) {
+                foreach ( $zone['shipping_methods'] as $method ) {
+                    if ( $method->enabled === 'yes' ) {
+                        $method_id = $method->get_rate_id();
+                        $method_title = $zone['zone_name'] . ' - ' . $method->get_title();
+                        $methods[ $method_id ] = $method_title;
+                    }
+                }
+            }
+        }
+        
+        // Add methods from default zone (zone 0)
+        $default_zone = new WC_Shipping_Zone( 0 );
+        $default_methods = $default_zone->get_shipping_methods( true );
+        
+        foreach ( $default_methods as $method ) {
+            if ( $method->enabled === 'yes' ) {
+                $method_id = $method->get_rate_id();
+                $method_title = __( 'Default', 'bg8-one-page-checkout' ) . ' - ' . $method->get_title();
+                $methods[ $method_id ] = $method_title;
+            }
+        }
+        
+        return $methods;
     }
 
     /**
@@ -403,7 +496,8 @@ class Admin {
                 border-radius: 4px;
                 cursor: pointer;
             }
-            .bg8-text-input {
+            .bg8-text-input,
+            .bg8-select {
                 width: 300px;
                 padding: 10px;
                 border: 1px solid #ddd;
@@ -481,8 +575,10 @@ class Admin {
                     document.getElementById("checkout_title").value = "Checkout";
                     document.getElementById("checkout_description").value = "Complete your purchase in 3 simple steps";
                     
-                    // Reset checkbox
+                    // Reset checkbox and shipping methods
                     document.getElementById("pickup_delivery_first").checked = false;
+                    document.getElementById("pickup_shipping_method").value = "";
+                    document.getElementById("delivery_shipping_method").value = "";
                     
                     alert("Settings have been reset to defaults. Click Save Changes to apply them.");
                 }
