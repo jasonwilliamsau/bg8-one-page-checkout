@@ -186,24 +186,6 @@ class Admin {
             'bg8_sc_options',
             [ 'field' => 'pickup_delivery_first', 'default' => false ]
         );
-
-        add_settings_field(
-            'pickup_shipping_method',
-            __( 'Default Shipping for Pickup', 'bg8-one-page-checkout' ),
-            [ __CLASS__, 'shipping_method_field_callback' ],
-            'bg8-one-page-checkout',
-            'bg8_sc_options',
-            [ 'field' => 'pickup_shipping_method', 'default' => '', 'type' => 'pickup' ]
-        );
-
-        add_settings_field(
-            'delivery_shipping_method',
-            __( 'Default Shipping for Delivery', 'bg8-one-page-checkout' ),
-            [ __CLASS__, 'shipping_method_field_callback' ],
-            'bg8-one-page-checkout',
-            'bg8_sc_options',
-            [ 'field' => 'delivery_shipping_method', 'default' => '', 'type' => 'delivery' ]
-        );
     }
 
     /**
@@ -233,14 +215,6 @@ class Admin {
             $sanitized['pickup_delivery_first'] = (bool) $input['pickup_delivery_first'];
         } else {
             $sanitized['pickup_delivery_first'] = false;
-        }
-
-        // Sanitize shipping method fields
-        if ( isset( $input['pickup_shipping_method'] ) ) {
-            $sanitized['pickup_shipping_method'] = sanitize_text_field( $input['pickup_shipping_method'] );
-        }
-        if ( isset( $input['delivery_shipping_method'] ) ) {
-            $sanitized['delivery_shipping_method'] = sanitize_text_field( $input['delivery_shipping_method'] );
         }
 
         return $sanitized;
@@ -312,6 +286,7 @@ class Admin {
         echo '<input type="checkbox" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="1" ' . checked( $value, true, false ) . ' class="bg8-checkbox" />';
         echo '<label for="' . esc_attr( $args['field'] ) . '">' . esc_html__( 'Show pickup/delivery selection before billing information', 'bg8-one-page-checkout' ) . '</label>';
         echo '<p class="bg8-description">' . esc_html__( 'Enable this to let customers choose pickup or delivery first. Pickup only requires billing info; delivery requires both billing and shipping info.', 'bg8-one-page-checkout' ) . '</p>';
+        echo '<p class="bg8-description">' . esc_html__( 'The plugin will automatically detect your shipping methods. Pickup methods (local_pickup, click & collect) and delivery methods (flat rate, table rate, etc.) are identified automatically.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
@@ -664,10 +639,8 @@ class Admin {
                     document.getElementById("checkout_title").value = "Checkout";
                     document.getElementById("checkout_description").value = "Complete your purchase in 3 simple steps";
                     
-                    // Reset checkbox and shipping methods
+                    // Reset checkbox
                     document.getElementById("pickup_delivery_first").checked = false;
-                    document.getElementById("pickup_shipping_method").value = "";
-                    document.getElementById("delivery_shipping_method").value = "";
                     
                     alert("Settings have been reset to defaults. Click Save Changes to apply them.");
                 }
