@@ -318,34 +318,35 @@ class Admin {
      * Shipping method field callback
      */
     public static function shipping_method_field_callback( $args ) {
+        // Initialize output buffer to capture any errors
+        ob_start();
+        
         try {
             $options = get_option( self::OPTION_NAME, [] );
             $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
             
-            // Get available shipping methods
-            $shipping_methods = self::get_shipping_methods();
-            
-            echo '<select id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" class="bg8-select">';
-            echo '<option value="">' . esc_html__( 'Auto-detect (recommended)', 'bg8-one-page-checkout' ) . '</option>';
-            
-            if ( ! empty( $shipping_methods ) && is_array( $shipping_methods ) ) {
-                foreach ( $shipping_methods as $method_id => $method_title ) {
-                    echo '<option value="' . esc_attr( $method_id ) . '" ' . selected( $value, $method_id, false ) . '>' . esc_html( $method_title ) . '</option>';
-                }
-            }
-            
-            echo '</select>';
+            echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" placeholder="e.g. local_pickup:100" />';
             
             if ( $args['type'] === 'pickup' ) {
-                echo '<p class="bg8-description">' . esc_html__( 'Choose which shipping method to pre-select when customer chooses pickup. Leave as "Auto-detect" to automatically find local pickup methods.', 'bg8-one-page-checkout' ) . '</p>';
+                echo '<p class="bg8-description">' . esc_html__( 'Enter the rate ID for pickup (e.g., "local_pickup:100"). Leave empty for auto-detect.', 'bg8-one-page-checkout' ) . '</p>';
+                echo '<p class="bg8-description">' . esc_html__( 'To find the rate ID, inspect the shipping method radio button value on the checkout page.', 'bg8-one-page-checkout' ) . '</p>';
             } else {
-                echo '<p class="bg8-description">' . esc_html__( 'Choose which shipping method to pre-select when customer chooses delivery. Leave as "Auto-detect" to automatically select the first non-pickup method.', 'bg8-one-page-checkout' ) . '</p>';
+                echo '<p class="bg8-description">' . esc_html__( 'Enter the rate ID for delivery (e.g., "flat_rate:50"). Leave empty for auto-detect.', 'bg8-one-page-checkout' ) . '</p>';
+                echo '<p class="bg8-description">' . esc_html__( 'To find the rate ID, inspect the shipping method radio button value on the checkout page.', 'bg8-one-page-checkout' ) . '</p>';
             }
+            
+            // Output the buffer
+            $output = ob_get_clean();
+            echo $output;
+            
         } catch ( Exception $e ) {
-            echo '<select id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" class="bg8-select">';
-            echo '<option value="">' . esc_html__( 'Auto-detect (recommended)', 'bg8-one-page-checkout' ) . '</option>';
-            echo '</select>';
-            echo '<p class="bg8-description" style="color: #dc3232;">' . esc_html__( 'Error loading shipping methods. Auto-detect will be used.', 'bg8-one-page-checkout' ) . '</p>';
+            ob_end_clean();
+            echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="" class="bg8-text-input" placeholder="e.g. local_pickup:100" />';
+            echo '<p class="bg8-description" style="color: #dc3232;">' . esc_html__( 'Error loading field. Enter rate ID manually or leave empty for auto-detect.', 'bg8-one-page-checkout' ) . '</p>';
+        } catch ( Error $e ) {
+            ob_end_clean();
+            echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="" class="bg8-text-input" placeholder="e.g. local_pickup:100" />';
+            echo '<p class="bg8-description" style="color: #dc3232;">' . esc_html__( 'Error loading field. Enter rate ID manually or leave empty for auto-detect.', 'bg8-one-page-checkout' ) . '</p>';
         }
     }
 
