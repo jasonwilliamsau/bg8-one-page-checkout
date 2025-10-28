@@ -189,7 +189,7 @@ class Admin {
 
         add_settings_field(
             'pickup_shipping_method',
-            __( 'Pickup Shipping Method', 'bg8-one-page-checkout' ),
+            __( 'Default Shipping for Pickup', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'shipping_method_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_options',
@@ -198,7 +198,7 @@ class Admin {
 
         add_settings_field(
             'delivery_shipping_method',
-            __( 'Delivery Shipping Method', 'bg8-one-page-checkout' ),
+            __( 'Default Shipping for Delivery', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'shipping_method_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_options',
@@ -334,9 +334,9 @@ class Admin {
         echo '</select>';
         
         if ( $args['type'] === 'pickup' ) {
-            echo '<p class="bg8-description">' . esc_html__( 'Select the shipping method to use when customer chooses pickup. Leave as "Auto-detect" to automatically find local pickup methods.', 'bg8-one-page-checkout' ) . '</p>';
+            echo '<p class="bg8-description">' . esc_html__( 'Choose which shipping method to pre-select when customer chooses pickup. Leave as "Auto-detect" to automatically find local pickup methods.', 'bg8-one-page-checkout' ) . '</p>';
         } else {
-            echo '<p class="bg8-description">' . esc_html__( 'Select the shipping method to use when customer chooses delivery. Leave as "Auto-detect" to automatically select the first non-pickup method.', 'bg8-one-page-checkout' ) . '</p>';
+            echo '<p class="bg8-description">' . esc_html__( 'Choose which shipping method to pre-select when customer chooses delivery. Leave as "Auto-detect" to automatically select the first non-pickup method.', 'bg8-one-page-checkout' ) . '</p>';
         }
     }
 
@@ -350,32 +350,48 @@ class Admin {
             return $methods;
         }
         
-        // Get all shipping zones
-        $zones = WC_Shipping_Zones::get_zones();
-        
-        // Add methods from each zone
-        foreach ( $zones as $zone ) {
-            if ( isset( $zone['shipping_methods'] ) && is_array( $zone['shipping_methods'] ) ) {
-                foreach ( $zone['shipping_methods'] as $method ) {
-                    if ( $method->enabled === 'yes' ) {
-                        $method_id = $method->get_rate_id();
-                        $method_title = $zone['zone_name'] . ' - ' . $method->get_title();
-                        $methods[ $method_id ] = $method_title;
+        try {
+            // Get all shipping zones
+            $zones = WC_Shipping_Zones::get_zones();
+            
+            // Add methods from each zone
+            foreach ( $zones as $zone ) {
+                if ( isset( $zone['shipping_methods'] ) && is_array( $zone['shipping_methods'] ) ) {
+                    foreach ( $zone['shipping_methods'] as $method ) {
+                        if ( isset( $method->enabled ) && $method->enabled === 'yes' ) {
+                            // Use instance_id and id to create a unique identifier
+                            $instance_id = isset( $method->instance_id ) ? $method->instance_id : '';
+                            $method_id = isset( $method->id ) ? $method->id : '';
+                            
+                            if ( $instance_id && $method_id ) {
+                                $rate_id = $method_id . ':' . $instance_id;
+                                $zone_name = isset( $zone['zone_name'] ) ? $zone['zone_name'] : __( 'Zone', 'bg8-one-page-checkout' );
+                                $method_title = $zone_name . ' - ' . $method->get_title();
+                                $methods[ $rate_id ] = $method_title;
+                            }
+                        }
                     }
                 }
             }
-        }
-        
-        // Add methods from default zone (zone 0)
-        $default_zone = new WC_Shipping_Zone( 0 );
-        $default_methods = $default_zone->get_shipping_methods( true );
-        
-        foreach ( $default_methods as $method ) {
-            if ( $method->enabled === 'yes' ) {
-                $method_id = $method->get_rate_id();
-                $method_title = __( 'Default', 'bg8-one-page-checkout' ) . ' - ' . $method->get_title();
-                $methods[ $method_id ] = $method_title;
+            
+            // Add methods from default zone (zone 0)
+            $default_zone = new WC_Shipping_Zone( 0 );
+            $default_methods = $default_zone->get_shipping_methods( true );
+            
+            foreach ( $default_methods as $method ) {
+                if ( isset( $method->enabled ) && $method->enabled === 'yes' ) {
+                    $instance_id = isset( $method->instance_id ) ? $method->instance_id : '';
+                    $method_id = isset( $method->id ) ? $method->id : '';
+                    
+                    if ( $instance_id && $method_id ) {
+                        $rate_id = $method_id . ':' . $instance_id;
+                        $method_title = __( 'Default Zone', 'bg8-one-page-checkout' ) . ' - ' . $method->get_title();
+                        $methods[ $rate_id ] = $method_title;
+                    }
+                }
             }
+        } catch ( Exception $e ) {
+            error_log( 'BG8 One Page Checkout: Error getting shipping methods - ' . $e->getMessage() );
         }
         
         return $methods;
