@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2025-11-06
+
+## [Unreleased]
+
+### Added
+- TBD
+
+### Changed
+- TBD
+
+### Fixed
+- TBD
+
+### Fixed
+- Critical bug fix: Loader no longer persists on order-received and order-pay pages
+- Plugin assets now only load on main checkout page, excluding order completion pages
+- Improved page detection using `is_wc_endpoint_url()` for better WooCommerce compatibility
+- Fixed infinite loader blocking user from viewing order confirmation after payment
+- Fixed infinite loader on failed order payment retry pages
+
 ## [1.2.2] - 2025-10-27
 
 ## [1.2.2] - 2025-10-27

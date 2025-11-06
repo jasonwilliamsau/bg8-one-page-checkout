@@ -28,7 +28,9 @@ class Plugin {
      * Adds a pre-paint class to <html> on checkout to avoid FOUC and show overlay.
      */
     public static function prepaint_inline_flag() {
+        // Only add loader on main checkout page, not order-received or order-pay pages
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
+        if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
         
         // Skip loader in page builders and admin
         // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Page builder detection, not form processing
@@ -50,6 +52,7 @@ class Plugin {
      */
     public static function inject_custom_css() {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
+        if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
 
         try {
             $brand_color = self::get_option( 'brand_color', '#d4127c' );
@@ -86,6 +89,7 @@ class Plugin {
      */
     public static function inject_header_config() {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
+        if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
 
         try {
             $checkout_title = self::get_option( 'checkout_title', 'Checkout' );
@@ -116,6 +120,7 @@ class Plugin {
      */
     public static function enqueue_assets() {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
+        if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
 
         // Styles
         wp_enqueue_style(
