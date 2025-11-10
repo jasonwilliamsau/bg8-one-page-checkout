@@ -8,13 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- TBD
+- Version consistency checks in deploy.sh and release.sh
+- Automatic stable tag and version updates in release scripts
 
 ### Changed
-- TBD
+- Updated version-bump.sh to use correct constant name (BG8OPC_VERSION)
+- Improved version verification in release scripts
 
 ### Fixed
-- TBD
+- Removed error_log() calls from production code (WordPress coding standards compliance)
+- Fixed missing translators comments for esc_html__() with placeholders
+- Added version parameter to wp_register_style() to prevent browser caching issues
+- Fixed stable tag mismatch in readme.txt
+- Fixed version mismatch in README.md
 
 ## [1.5.1] - 2025-11-10
 

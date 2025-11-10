@@ -91,6 +91,34 @@ if grep -q "## \[Unreleased\]" CHANGELOG.md; then
     rm CHANGELOG.md.bak
 fi
 
+# Ensure readme.txt stable tag matches new version
+print_status "Updating readme.txt stable tag..."
+if grep -q "Stable tag:" readme.txt; then
+    sed -i.bak "s/Stable tag: .*/Stable tag: $new_version/" readme.txt
+    rm -f readme.txt.bak
+    if grep -q "Stable tag: $new_version" readme.txt; then
+        print_success "readme.txt stable tag updated to $new_version"
+    else
+        print_warning "readme.txt stable tag may not have been updated correctly"
+    fi
+else
+    print_warning "Stable tag not found in readme.txt"
+fi
+
+# Ensure README.md version matches new version
+print_status "Updating README.md version..."
+if grep -q "\*\*Version\*\*:" README.md; then
+    sed -i.bak "s/\*\*Version\*\*: .*/\*\*Version\*\*: $new_version/" README.md
+    rm -f README.md.bak
+    if grep -q "\*\*Version\*\*: $new_version" README.md; then
+        print_success "README.md version updated to $new_version"
+    else
+        print_warning "README.md version may not have been updated correctly"
+    fi
+else
+    print_warning "Version not found in README.md"
+fi
+
 # Stage all changes
 print_status "Staging changes..."
 git add .

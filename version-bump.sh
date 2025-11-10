@@ -28,7 +28,7 @@ echo -e "${GREEN}New version: ${NEW_VERSION}${NC}"
 # Update plugin files with new version
 echo -e "${BLUE}Updating plugin files...${NC}"
 sed -i.bak "s/Version: .*/Version: ${NEW_VERSION}/" bg8-one-page-checkout.php
-sed -i.bak "s/define( 'BG8_SC_VERSION', .*/define( 'BG8_SC_VERSION', '${NEW_VERSION}' );/" bg8-one-page-checkout.php
+sed -i.bak "s/define( 'BG8OPC_VERSION', .*/define( 'BG8OPC_VERSION', '${NEW_VERSION}' );/" bg8-one-page-checkout.php
 rm -f bg8-one-page-checkout.php.bak
 
 # Update CHANGELOG.md
@@ -55,6 +55,15 @@ sed -i.bak "s/\*\*Version\*\*: .*/\*\*Version\*\*: ${NEW_VERSION}/" README.md
 # Update readme.txt stable tag
 echo -e "${BLUE}Updating readme.txt stable tag...${NC}"
 sed -i.bak "s/Stable tag: .*/Stable tag: ${NEW_VERSION}/" readme.txt
+
+# Verify updates
+echo -e "${BLUE}Verifying version updates...${NC}"
+if ! grep -q "Stable tag: ${NEW_VERSION}" readme.txt; then
+    echo -e "${YELLOW}⚠️  Warning: readme.txt stable tag may not have been updated correctly${NC}"
+fi
+if ! grep -q "\*\*Version\*\*: ${NEW_VERSION}" README.md; then
+    echo -e "${YELLOW}⚠️  Warning: README.md version may not have been updated correctly${NC}"
+fi
 
 # Clean up backup files
 rm -f CHANGELOG.md.bak README.md.bak readme.txt.bak

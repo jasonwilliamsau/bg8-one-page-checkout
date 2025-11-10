@@ -438,8 +438,8 @@ class Admin {
         $required = isset( $args['required'] ) && $args['required'];
         
         echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" ' . ( $required ? 'required' : '' ) . ' />';
-        // translators: %s is the default text value
         if ( ! empty( $args['default'] ) ) {
+            // translators: %s is the default text value
             echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
         }
         if ( $required ) {
@@ -456,8 +456,8 @@ class Admin {
         $required = isset( $args['required'] ) && $args['required'];
         
         echo '<textarea id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" class="bg8-textarea-input" rows="4" ' . ( $required ? 'required' : '' ) . '>' . esc_textarea( $value ) . '</textarea>';
-        // translators: %s is the default text value
         if ( ! empty( $args['default'] ) ) {
+            // translators: %s is the default text value
             echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
         }
         if ( $required ) {
@@ -633,15 +633,9 @@ class Admin {
                 }
             }
         } catch ( Exception $e ) {
-            // Log the error but don't crash
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                error_log( 'BG8 One Page Checkout: Error getting shipping methods - ' . $e->getMessage() );
-            }
+            // Silently fail - return empty array if shipping methods can't be retrieved
         } catch ( Error $e ) {
-            // Catch PHP 7+ errors too
-            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-                error_log( 'BG8 One Page Checkout: Fatal error getting shipping methods - ' . $e->getMessage() );
-            }
+            // Silently fail - return empty array if shipping methods can't be retrieved
         }
         
         return $methods;
@@ -692,7 +686,7 @@ class Admin {
         }
 
         // Register and enqueue admin stylesheet with inline styles
-        wp_register_style( 'bg8opc-admin-style', '' );
+        wp_register_style( 'bg8opc-admin-style', '', array(), BG8OPC_VERSION );
         wp_enqueue_style( 'bg8opc-admin-style' );
         
         // Add custom admin styling

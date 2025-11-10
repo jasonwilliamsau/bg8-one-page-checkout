@@ -49,6 +49,35 @@ fi
 # Display current version
 print_info "Current plugin version: ${VERSION}"
 
+# Verify version consistency across files
+print_info "Verifying version consistency..."
+readme_stable_tag=$(grep "Stable tag:" readme.txt | sed 's/.*Stable tag: *//' | tr -d ' ')
+readme_md_version=$(grep "\*\*Version\*\*:" README.md | sed 's/.*\*\*Version\*\*: *//' | tr -d ' ')
+
+version_mismatch=false
+
+if [ "$readme_stable_tag" != "$VERSION" ]; then
+    print_warning "Version mismatch: readme.txt stable tag ($readme_stable_tag) != plugin version ($VERSION)"
+    print_info "Updating readme.txt stable tag to match plugin version..."
+    sed -i.bak "s/Stable tag: .*/Stable tag: ${VERSION}/" readme.txt
+    rm -f readme.txt.bak
+    version_mismatch=true
+fi
+
+if [ "$readme_md_version" != "$VERSION" ]; then
+    print_warning "Version mismatch: README.md version ($readme_md_version) != plugin version ($VERSION)"
+    print_info "Updating README.md version to match plugin version..."
+    sed -i.bak "s/\*\*Version\*\*: .*/\*\*Version\*\*: ${VERSION}/" README.md
+    rm -f README.md.bak
+    version_mismatch=true
+fi
+
+if [ "$version_mismatch" = false ]; then
+    print_status "Version consistency verified across all files"
+else
+    print_status "Version files updated to match plugin version"
+fi
+
 # Clean previous builds
 print_info "Cleaning previous builds..."
 rm -rf "${BUILD_DIR}" "${DIST_DIR}"
