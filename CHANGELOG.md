@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - TBD
 
+## [1.5.1] - 2025-11-10
+
+### Fixed
+- Admin field names corrected (Customer/Recipient/Delivery/Payment instead of Step 1/2/3)
+- Section order corrected (Tab Order before Checkout Options)
+- Pickup/Delivery customization now correctly customizes buttons instead of tab
+- Saved values now properly display in admin (backward compatibility maintained)
+
 ## [1.5.0] - 2025-11-10
 
 ### Added
