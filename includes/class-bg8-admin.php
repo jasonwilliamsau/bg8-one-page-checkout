@@ -91,57 +91,75 @@ class Admin {
         );
 
         add_settings_field(
-            'step_1_label',
-            __( 'Step 1 Label', 'bg8-one-page-checkout' ),
+            'customer_label',
+            __( 'Customer Label', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_1_label', 'default' => 'Your Details' ]
+            [ 'field' => 'customer_label', 'default' => 'Your Details' ]
         );
 
         add_settings_field(
-            'step_1_heading',
-            __( 'Step 1 Heading', 'bg8-one-page-checkout' ),
+            'customer_heading',
+            __( 'Customer Heading', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_1_heading', 'default' => 'Enter your billing information' ]
+            [ 'field' => 'customer_heading', 'default' => 'Enter your billing information' ]
         );
 
         add_settings_field(
-            'step_2_label',
-            __( 'Step 2 Label', 'bg8-one-page-checkout' ),
+            'recipient_label',
+            __( 'Recipient Label', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_2_label', 'default' => 'Recipient' ]
+            [ 'field' => 'recipient_label', 'default' => 'Recipient' ]
         );
 
         add_settings_field(
-            'step_2_heading',
-            __( 'Step 2 Heading', 'bg8-one-page-checkout' ),
+            'recipient_heading',
+            __( 'Recipient Heading', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_2_heading', 'default' => 'Shipping information' ]
+            [ 'field' => 'recipient_heading', 'default' => 'Shipping information' ]
         );
 
         add_settings_field(
-            'step_3_label',
-            __( 'Step 3 Label', 'bg8-one-page-checkout' ),
+            'delivery_label',
+            __( 'Delivery Label', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_3_label', 'default' => 'Confirm' ]
+            [ 'field' => 'delivery_label', 'default' => 'Choose' ]
         );
 
         add_settings_field(
-            'step_3_heading',
-            __( 'Step 3 Heading', 'bg8-one-page-checkout' ),
+            'delivery_heading',
+            __( 'Delivery Heading', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_labels',
-            [ 'field' => 'step_3_heading', 'default' => 'Review your order' ]
+            [ 'field' => 'delivery_heading', 'default' => 'How would you like to receive your order?' ]
+        );
+
+        add_settings_field(
+            'payment_label',
+            __( 'Payment Label', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_labels',
+            [ 'field' => 'payment_label', 'default' => 'Confirm' ]
+        );
+
+        add_settings_field(
+            'payment_heading',
+            __( 'Payment Heading', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_labels',
+            [ 'field' => 'payment_heading', 'default' => 'Review your order' ]
         );
 
         // Header section
@@ -170,23 +188,6 @@ class Admin {
             [ 'field' => 'checkout_description', 'default' => 'Complete your purchase in 3 simple steps' ]
         );
 
-        // Checkout Options section
-        add_settings_section(
-            'bg8_sc_options',
-            '', // Empty title to prevent duplicate headings
-            [ __CLASS__, 'options_section_callback' ],
-            'bg8-one-page-checkout'
-        );
-
-        add_settings_field(
-            'pickup_delivery_first',
-            __( 'Pickup / Delivery First', 'bg8-one-page-checkout' ),
-            [ __CLASS__, 'checkbox_field_callback' ],
-            'bg8-one-page-checkout',
-            'bg8_sc_options',
-            [ 'field' => 'pickup_delivery_first', 'default' => false ]
-        );
-
         // Tab Order section
         add_settings_section(
             'bg8_sc_tab_order',
@@ -204,7 +205,24 @@ class Admin {
             [ 'field' => 'tab_order', 'default' => 'delivery,billing,shipping,payment' ]
         );
 
-        // Pickup/Delivery Tab Customization section
+        // Checkout Options section
+        add_settings_section(
+            'bg8_sc_options',
+            '', // Empty title to prevent duplicate headings
+            [ __CLASS__, 'options_section_callback' ],
+            'bg8-one-page-checkout'
+        );
+
+        add_settings_field(
+            'pickup_delivery_first',
+            __( 'Pickup / Delivery First', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'checkbox_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_options',
+            [ 'field' => 'pickup_delivery_first', 'default' => false ]
+        );
+
+        // Pickup/Delivery Button Customization section
         add_settings_section(
             'bg8_sc_pickup_delivery',
             '', // Empty title to prevent duplicate headings
@@ -213,30 +231,57 @@ class Admin {
         );
 
         add_settings_field(
-            'pickup_delivery_heading',
-            __( 'Tab Heading', 'bg8-one-page-checkout' ),
+            'pickup_button_text',
+            __( 'Pickup Button Text', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_pickup_delivery',
-            [ 'field' => 'pickup_delivery_heading', 'default' => 'How would you like to receive your order?', 'required' => true ]
+            [ 'field' => 'pickup_button_text', 'default' => 'Pickup', 'required' => false ]
         );
 
         add_settings_field(
-            'pickup_delivery_description',
-            __( 'Tab Description', 'bg8-one-page-checkout' ),
-            [ __CLASS__, 'textarea_field_callback' ],
-            'bg8-one-page-checkout',
-            'bg8_sc_pickup_delivery',
-            [ 'field' => 'pickup_delivery_description', 'default' => '', 'required' => false ]
-        );
-
-        add_settings_field(
-            'pickup_delivery_icon',
-            __( 'Tab Icon', 'bg8-one-page-checkout' ),
+            'pickup_button_icon',
+            __( 'Pickup Button Icon', 'bg8-one-page-checkout' ),
             [ __CLASS__, 'text_field_callback' ],
             'bg8-one-page-checkout',
             'bg8_sc_pickup_delivery',
-            [ 'field' => 'pickup_delivery_icon', 'default' => '', 'required' => false ]
+            [ 'field' => 'pickup_button_icon', 'default' => '💐', 'required' => false ]
+        );
+
+        add_settings_field(
+            'pickup_button_desc',
+            __( 'Pickup Button Description', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'pickup_button_desc', 'default' => 'Collect from store', 'required' => false ]
+        );
+
+        add_settings_field(
+            'delivery_button_text',
+            __( 'Delivery Button Text', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'delivery_button_text', 'default' => 'Delivery', 'required' => false ]
+        );
+
+        add_settings_field(
+            'delivery_button_icon',
+            __( 'Delivery Button Icon', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'delivery_button_icon', 'default' => '🚚', 'required' => false ]
+        );
+
+        add_settings_field(
+            'delivery_button_desc',
+            __( 'Delivery Button Description', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'delivery_button_desc', 'default' => 'Deliver to my address', 'required' => false ]
         );
     }
 
@@ -254,17 +299,45 @@ class Admin {
             }
         }
 
-        // Sanitize text fields
-        $text_fields = [ 'step_1_label', 'step_1_heading', 'step_2_label', 'step_2_heading', 'step_3_label', 'step_3_heading', 'checkout_title', 'checkout_description', 'pickup_delivery_heading', 'pickup_delivery_icon' ];
+        // Sanitize text fields - include both new and old field names for backward compatibility
+        $text_fields = [ 
+            // New field names
+            'customer_label', 'customer_heading', 'recipient_label', 'recipient_heading', 
+            'delivery_label', 'delivery_heading', 'payment_label', 'payment_heading',
+            'checkout_title', 'checkout_description',
+            'pickup_button_text', 'pickup_button_icon', 'pickup_button_desc',
+            'delivery_button_text', 'delivery_button_icon', 'delivery_button_desc',
+            // Old field names (for backward compatibility)
+            'step_1_label', 'step_1_heading', 'step_2_label', 'step_2_heading', 
+            'step_3_label', 'step_3_heading', 'pickup_delivery_heading', 'pickup_delivery_icon'
+        ];
         foreach ( $text_fields as $field ) {
             if ( isset( $input[ $field ] ) ) {
                 $sanitized[ $field ] = sanitize_text_field( $input[ $field ] );
             }
         }
 
-        // Sanitize textarea fields
-        if ( isset( $input['pickup_delivery_description'] ) ) {
-            $sanitized['pickup_delivery_description'] = sanitize_textarea_field( $input['pickup_delivery_description'] );
+        // Migrate old field names to new ones if new ones don't exist
+        if ( ! isset( $sanitized['customer_label'] ) && isset( $sanitized['step_1_label'] ) ) {
+            $sanitized['customer_label'] = $sanitized['step_1_label'];
+        }
+        if ( ! isset( $sanitized['customer_heading'] ) && isset( $sanitized['step_1_heading'] ) ) {
+            $sanitized['customer_heading'] = $sanitized['step_1_heading'];
+        }
+        if ( ! isset( $sanitized['recipient_label'] ) && isset( $sanitized['step_2_label'] ) ) {
+            $sanitized['recipient_label'] = $sanitized['step_2_label'];
+        }
+        if ( ! isset( $sanitized['recipient_heading'] ) && isset( $sanitized['step_2_heading'] ) ) {
+            $sanitized['recipient_heading'] = $sanitized['step_2_heading'];
+        }
+        if ( ! isset( $sanitized['payment_label'] ) && isset( $sanitized['step_3_label'] ) ) {
+            $sanitized['payment_label'] = $sanitized['step_3_label'];
+        }
+        if ( ! isset( $sanitized['payment_heading'] ) && isset( $sanitized['step_3_heading'] ) ) {
+            $sanitized['payment_heading'] = $sanitized['step_3_heading'];
+        }
+        if ( ! isset( $sanitized['delivery_heading'] ) && isset( $sanitized['pickup_delivery_heading'] ) ) {
+            $sanitized['delivery_heading'] = $sanitized['pickup_delivery_heading'];
         }
 
         // Sanitize tab order
@@ -292,10 +365,6 @@ class Admin {
             $sanitized['pickup_delivery_first'] = false;
         }
 
-        // Validate required fields
-        if ( isset( $sanitized['pickup_delivery_heading'] ) && empty( trim( $sanitized['pickup_delivery_heading'] ) ) ) {
-            $sanitized['pickup_delivery_heading'] = 'How would you like to receive your order?';
-        }
 
         return $sanitized;
     }
@@ -344,8 +413,8 @@ class Admin {
      * Pickup/Delivery section callback
      */
     public static function pickup_delivery_section_callback() {
-        echo '<div class="bg8-section-title">' . esc_html__( 'Pickup/Delivery Tab Customization', 'bg8-one-page-checkout' ) . '</div>';
-        echo '<p>' . esc_html__( 'Customize the content of the pickup/delivery tab. Heading is required; description and icon are optional.', 'bg8-one-page-checkout' ) . '</p>';
+        echo '<div class="bg8-section-title">' . esc_html__( 'Pickup/Delivery Button Customization', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Customize the pickup and delivery button text, icons, and descriptions shown when "Pickup / Delivery First" is enabled.', 'bg8-one-page-checkout' ) . '</p>';
     }
 
     /**
@@ -769,25 +838,30 @@ class Admin {
                     document.getElementById("header_text_color").value = "#ffffff";
                     
                     // Reset text fields
-                    document.getElementById("step_1_label").value = "Your Details";
-                    document.getElementById("step_1_heading").value = "Enter your billing information";
-                    document.getElementById("step_2_label").value = "Recipient";
-                    document.getElementById("step_2_heading").value = "Shipping information";
-                    document.getElementById("step_3_label").value = "Confirm";
-                    document.getElementById("step_3_heading").value = "Review your order";
+                    document.getElementById("customer_label").value = "Your Details";
+                    document.getElementById("customer_heading").value = "Enter your billing information";
+                    document.getElementById("recipient_label").value = "Recipient";
+                    document.getElementById("recipient_heading").value = "Shipping information";
+                    document.getElementById("delivery_label").value = "Choose";
+                    document.getElementById("delivery_heading").value = "How would you like to receive your order?";
+                    document.getElementById("payment_label").value = "Confirm";
+                    document.getElementById("payment_heading").value = "Review your order";
                     document.getElementById("checkout_title").value = "Checkout";
                     document.getElementById("checkout_description").value = "Complete your purchase in 3 simple steps";
-                    
-                    // Reset checkbox
-                    document.getElementById("pickup_delivery_first").checked = false;
                     
                     // Reset tab order
                     document.getElementById("tab_order").value = "delivery,billing,shipping,payment";
                     
-                    // Reset pickup/delivery customization
-                    document.getElementById("pickup_delivery_heading").value = "How would you like to receive your order?";
-                    document.getElementById("pickup_delivery_description").value = "";
-                    document.getElementById("pickup_delivery_icon").value = "";
+                    // Reset checkbox
+                    document.getElementById("pickup_delivery_first").checked = false;
+                    
+                    // Reset pickup/delivery button customization
+                    document.getElementById("pickup_button_text").value = "Pickup";
+                    document.getElementById("pickup_button_icon").value = "💐";
+                    document.getElementById("pickup_button_desc").value = "Collect from store";
+                    document.getElementById("delivery_button_text").value = "Delivery";
+                    document.getElementById("delivery_button_icon").value = "🚚";
+                    document.getElementById("delivery_button_desc").value = "Deliver to my address";
                     
                     alert("Settings have been reset to defaults. Click Save Changes to apply them.");
                 }
@@ -796,10 +870,31 @@ class Admin {
     }
 
     /**
-     * Get option value with fallback to default
+     * Get option value with fallback to default and backward compatibility
      */
     public static function get_option( $key, $default = '' ) {
         $options = get_option( self::OPTION_NAME, [] );
-        return isset( $options[ $key ] ) ? $options[ $key ] : $default;
+        
+        // If key exists, return it
+        if ( isset( $options[ $key ] ) ) {
+            return $options[ $key ];
+        }
+        
+        // Backward compatibility: map old field names to new ones
+        $field_mapping = [
+            'customer_label' => 'step_1_label',
+            'customer_heading' => 'step_1_heading',
+            'recipient_label' => 'step_2_label',
+            'recipient_heading' => 'step_2_heading',
+            'payment_label' => 'step_3_label',
+            'payment_heading' => 'step_3_heading',
+            'delivery_heading' => 'pickup_delivery_heading',
+        ];
+        
+        if ( isset( $field_mapping[ $key ] ) && isset( $options[ $field_mapping[ $key ] ] ) ) {
+            return $options[ $field_mapping[ $key ] ];
+        }
+        
+        return $default;
     }
 }

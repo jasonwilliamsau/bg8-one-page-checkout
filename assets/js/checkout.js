@@ -103,24 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if pickup/delivery first is enabled
   const config = window.bg8CheckoutConfig || {};
   const pickupDeliveryFirst = config.pickupDeliveryFirst === true || config.pickupDeliveryFirst === 'true';
-  const pickupDeliveryHeading = config.pickupDeliveryHeading || 'How would you like to receive your order?';
-  const pickupDeliveryDescription = config.pickupDeliveryDescription || '';
-  const pickupDeliveryIcon = config.pickupDeliveryIcon || '';
+  const deliveryHeading = config.deliveryHeading || 'How would you like to receive your order?';
+  const deliveryLabel = config.deliveryLabel || 'Choose';
+  const pickupButtonText = config.pickupButtonText || 'Pickup';
+  const pickupButtonIcon = config.pickupButtonIcon || '💐';
+  const pickupButtonDesc = config.pickupButtonDesc || 'Collect from store';
+  const deliveryButtonText = config.deliveryButtonText || 'Delivery';
+  const deliveryButtonIcon = config.deliveryButtonIcon || '🚚';
+  const deliveryButtonDesc = config.deliveryButtonDesc || 'Deliver to my address';
   let pickupDeliveryChoice = null;
   
   // Create pickup/delivery selection step if enabled
   let pickupDeliveryStep = null;
   let pickupDeliveryTab = null;
   if (pickupDeliveryFirst) {
-    pickupDeliveryStep = makeStep('wc-step-pickup-delivery', pickupDeliveryHeading);
+    pickupDeliveryStep = makeStep('wc-step-pickup-delivery', deliveryHeading);
     
-    // Add description if provided
-    if (pickupDeliveryDescription) {
-      const descEl = document.createElement('p');
-      descEl.className = 'wc-pickup-delivery-description';
-      descEl.textContent = pickupDeliveryDescription;
-      pickupDeliveryStep.body.prepend(descEl);
-    }
     const choiceContainer = document.createElement('div');
     choiceContainer.className = 'wc-pickup-delivery-choice';
     
@@ -128,13 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     pickupBtn.type = 'button';
     pickupBtn.className = 'wc-choice-btn';
     pickupBtn.dataset.choice = 'pickup';
-    pickupBtn.innerHTML = '<span class="wc-choice-icon">💐</span><span class="wc-choice-text">Pickup</span><span class="wc-choice-desc">Collect from store</span>';
+    pickupBtn.innerHTML = `<span class="wc-choice-icon">${pickupButtonIcon}</span><span class="wc-choice-text">${pickupButtonText}</span><span class="wc-choice-desc">${pickupButtonDesc}</span>`;
     
     const deliveryBtn = document.createElement('button');
     deliveryBtn.type = 'button';
     deliveryBtn.className = 'wc-choice-btn';
     deliveryBtn.dataset.choice = 'delivery';
-    deliveryBtn.innerHTML = '<span class="wc-choice-icon">🚚</span><span class="wc-choice-text">Delivery</span><span class="wc-choice-desc">Deliver to my address</span>';
+    deliveryBtn.innerHTML = `<span class="wc-choice-icon">${deliveryButtonIcon}</span><span class="wc-choice-text">${deliveryButtonText}</span><span class="wc-choice-desc">${deliveryButtonDesc}</span>`;
     
     const handleChoice = (choice, skipVisibilityUpdate = false) => {
       pickupDeliveryChoice = choice;
@@ -213,18 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     choiceContainer.append(pickupBtn, deliveryBtn);
     pickupDeliveryStep.body.append(choiceContainer);
     steps.push(pickupDeliveryStep.panel);
-    
-    // Use custom icon if provided, otherwise use default label
-    const pickupDeliveryTabLabel = pickupDeliveryIcon || 'Choose';
-    pickupDeliveryTab = makeTab('wc-step-pickup-delivery', pickupDeliveryTabLabel, 0);
-    // Add icon to tab if provided
-    if (pickupDeliveryIcon) {
-      const iconEl = document.createElement('span');
-      iconEl.className = 'wc-tab-icon';
-      iconEl.textContent = pickupDeliveryIcon;
-      pickupDeliveryTab.stepLabel.prepend(iconEl);
-      pickupDeliveryTab.stepLabel.insertAdjacentText('beforeend', ' ');
-    }
+    pickupDeliveryTab = makeTab('wc-step-pickup-delivery', deliveryLabel, 0);
     tabs.push(pickupDeliveryTab);
     
     // Pre-select delivery (skip visibility update until step2 is created)
@@ -284,21 +271,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   }
 
-  // Step 1 — Your details (billing)
-  const step1 = makeStep('wc-step-billing', 'Enter your details');
+  // Step 1 — Customer (billing)
+  const customerLabel = config.customerLabel || 'Your Details';
+  const customerHeading = config.customerHeading || 'Enter your billing information';
+  const step1 = makeStep('wc-step-billing', customerHeading);
   if (billingFields) step1.body.append(billingFields);
   if (additionalFields) step1.body.append(additionalFields);
   steps.push(step1.panel);
-  tabs.push(makeTab('wc-step-billing', 'Your details', pickupDeliveryFirst ? 1 : 0));
+  tabs.push(makeTab('wc-step-billing', customerLabel, pickupDeliveryFirst ? 1 : 0));
 
   // Step 2 — Recipient (shipping)
-  const step2 = makeStep('wc-step-shipping', 'Recipient details');
+  const recipientLabel = config.recipientLabel || 'Recipient';
+  const recipientHeading = config.recipientHeading || 'Shipping information';
+  const step2 = makeStep('wc-step-shipping', recipientHeading);
   if (shippingFields) step2.body.append(shippingFields);
   steps.push(step2.panel);
-  tabs.push(makeTab('wc-step-shipping', 'Recipient', pickupDeliveryFirst ? 2 : 1));
+  tabs.push(makeTab('wc-step-shipping', recipientLabel, pickupDeliveryFirst ? 2 : 1));
 
-  // Step 3 — Confirm (order review + shipping methods + payment)
-  const step3 = makeStep('wc-step-confirm', 'Confirm your Order', []);
+  // Step 3 — Payment (order review + shipping methods + payment)
+  const paymentLabel = config.paymentLabel || 'Confirm';
+  const paymentHeading = config.paymentHeading || 'Review your order';
+  const step3 = makeStep('wc-step-confirm', paymentHeading, []);
   step3.body.append(orderReview);
 
   // Coupon toggle if hidden by theme
@@ -320,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   steps.push(step3.panel);
-  tabs.push(makeTab('wc-step-confirm', 'Confirm', pickupDeliveryFirst ? 3 : 2));
+  tabs.push(makeTab('wc-step-confirm', paymentLabel, pickupDeliveryFirst ? 3 : 2));
 
   // Reorder tabs based on config if provided
   const tabOrder = config.tabOrder || (pickupDeliveryFirst ? 'delivery,billing,shipping,payment' : 'billing,shipping,payment');

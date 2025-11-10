@@ -80,11 +80,32 @@ class Plugin {
     }
 
     /**
-     * Get option value with fallback to default (frontend-safe)
+     * Get option value with fallback to default and backward compatibility (frontend-safe)
      */
     public static function get_option( $key, $default = '' ) {
         $options = get_option( 'bg8opc_options', [] );
-        return isset( $options[ $key ] ) ? $options[ $key ] : $default;
+        
+        // If key exists, return it
+        if ( isset( $options[ $key ] ) ) {
+            return $options[ $key ];
+        }
+        
+        // Backward compatibility: map old field names to new ones
+        $field_mapping = [
+            'customer_label' => 'step_1_label',
+            'customer_heading' => 'step_1_heading',
+            'recipient_label' => 'step_2_label',
+            'recipient_heading' => 'step_2_heading',
+            'payment_label' => 'step_3_label',
+            'payment_heading' => 'step_3_heading',
+            'delivery_heading' => 'pickup_delivery_heading',
+        ];
+        
+        if ( isset( $field_mapping[ $key ] ) && isset( $options[ $field_mapping[ $key ] ] ) ) {
+            return $options[ $field_mapping[ $key ] ];
+        }
+        
+        return $default;
     }
 
     /**
@@ -99,9 +120,24 @@ class Plugin {
             $checkout_description = self::get_option( 'checkout_description', 'Complete your purchase in 3 simple steps' );
             $pickup_delivery_first = self::get_option( 'pickup_delivery_first', false );
             $tab_order = self::get_option( 'tab_order', 'delivery,billing,shipping,payment' );
-            $pickup_delivery_heading = self::get_option( 'pickup_delivery_heading', 'How would you like to receive your order?' );
-            $pickup_delivery_description = self::get_option( 'pickup_delivery_description', '' );
-            $pickup_delivery_icon = self::get_option( 'pickup_delivery_icon', '' );
+            
+            // Labels and headings
+            $customer_label = self::get_option( 'customer_label', 'Your Details' );
+            $customer_heading = self::get_option( 'customer_heading', 'Enter your billing information' );
+            $recipient_label = self::get_option( 'recipient_label', 'Recipient' );
+            $recipient_heading = self::get_option( 'recipient_heading', 'Shipping information' );
+            $delivery_label = self::get_option( 'delivery_label', 'Choose' );
+            $delivery_heading = self::get_option( 'delivery_heading', 'How would you like to receive your order?' );
+            $payment_label = self::get_option( 'payment_label', 'Confirm' );
+            $payment_heading = self::get_option( 'payment_heading', 'Review your order' );
+            
+            // Button customization
+            $pickup_button_text = self::get_option( 'pickup_button_text', 'Pickup' );
+            $pickup_button_icon = self::get_option( 'pickup_button_icon', '💐' );
+            $pickup_button_desc = self::get_option( 'pickup_button_desc', 'Collect from store' );
+            $delivery_button_text = self::get_option( 'delivery_button_text', 'Delivery' );
+            $delivery_button_icon = self::get_option( 'delivery_button_icon', '🚚' );
+            $delivery_button_desc = self::get_option( 'delivery_button_desc', 'Deliver to my address' );
             
             // Only show header if at least one field has content
             $show_header = !empty( $checkout_title ) || !empty( $checkout_description );
@@ -112,9 +148,20 @@ class Plugin {
             $config_script .= 'showHeader: ' . ( $show_header ? 'true' : 'false' ) . ',';
             $config_script .= 'pickupDeliveryFirst: ' . ( $pickup_delivery_first ? 'true' : 'false' ) . ',';
             $config_script .= 'tabOrder: ' . wp_json_encode( $tab_order ) . ',';
-            $config_script .= 'pickupDeliveryHeading: ' . wp_json_encode( $pickup_delivery_heading ) . ',';
-            $config_script .= 'pickupDeliveryDescription: ' . wp_json_encode( $pickup_delivery_description ) . ',';
-            $config_script .= 'pickupDeliveryIcon: ' . wp_json_encode( $pickup_delivery_icon );
+            $config_script .= 'customerLabel: ' . wp_json_encode( $customer_label ) . ',';
+            $config_script .= 'customerHeading: ' . wp_json_encode( $customer_heading ) . ',';
+            $config_script .= 'recipientLabel: ' . wp_json_encode( $recipient_label ) . ',';
+            $config_script .= 'recipientHeading: ' . wp_json_encode( $recipient_heading ) . ',';
+            $config_script .= 'deliveryLabel: ' . wp_json_encode( $delivery_label ) . ',';
+            $config_script .= 'deliveryHeading: ' . wp_json_encode( $delivery_heading ) . ',';
+            $config_script .= 'paymentLabel: ' . wp_json_encode( $payment_label ) . ',';
+            $config_script .= 'paymentHeading: ' . wp_json_encode( $payment_heading ) . ',';
+            $config_script .= 'pickupButtonText: ' . wp_json_encode( $pickup_button_text ) . ',';
+            $config_script .= 'pickupButtonIcon: ' . wp_json_encode( $pickup_button_icon ) . ',';
+            $config_script .= 'pickupButtonDesc: ' . wp_json_encode( $pickup_button_desc ) . ',';
+            $config_script .= 'deliveryButtonText: ' . wp_json_encode( $delivery_button_text ) . ',';
+            $config_script .= 'deliveryButtonIcon: ' . wp_json_encode( $delivery_button_icon ) . ',';
+            $config_script .= 'deliveryButtonDesc: ' . wp_json_encode( $delivery_button_desc );
             $config_script .= '};';
 
             wp_add_inline_script( 'bg8opc-checkout', $config_script, 'before' );
