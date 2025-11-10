@@ -124,6 +124,6 @@ Developed by [Blackgate](https://blackgate.com.au) - WordPress and WooCommerce s
 
 ---
 
-**Version**: 1.5.1
+**Version**: 1.5.2
 **Last Updated**: January 2024  
 **Tested up to**: WordPress 6.4
