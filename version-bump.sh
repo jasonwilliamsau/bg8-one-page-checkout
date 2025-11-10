@@ -16,13 +16,33 @@ TYPE=${1:-patch}
 echo -e "${BLUE}🔄 BG8 One Page Checkout - Version Bump${NC}"
 echo -e "${BLUE}=====================================${NC}"
 
-# Get current version
+# Get current version from plugin file (source of truth)
 CURRENT_VERSION=$(grep "Version:" bg8-one-page-checkout.php | sed 's/.*Version: *//' | tr -d ' ')
 echo -e "${YELLOW}Current version: ${CURRENT_VERSION}${NC}"
 
-# Bump version using npm
-echo -e "${BLUE}Bumping ${TYPE} version...${NC}"
-NEW_VERSION=$(npm version ${TYPE} --no-git-tag-version | sed 's/v//')
+# Parse version components
+IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+MAJOR=${VERSION_PARTS[0]}
+MINOR=${VERSION_PARTS[1]}
+PATCH=${VERSION_PARTS[2]}
+
+# Bump version based on type
+case "$TYPE" in
+    major)
+        MAJOR=$((MAJOR + 1))
+        MINOR=0
+        PATCH=0
+        ;;
+    minor)
+        MINOR=$((MINOR + 1))
+        PATCH=0
+        ;;
+    patch)
+        PATCH=$((PATCH + 1))
+        ;;
+esac
+
+NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 echo -e "${GREEN}New version: ${NEW_VERSION}${NC}"
 
 # Update plugin files with new version
@@ -30,6 +50,19 @@ echo -e "${BLUE}Updating plugin files...${NC}"
 sed -i.bak "s/Version: .*/Version: ${NEW_VERSION}/" bg8-one-page-checkout.php
 sed -i.bak "s/define( 'BG8OPC_VERSION', .*/define( 'BG8OPC_VERSION', '${NEW_VERSION}' );/" bg8-one-page-checkout.php
 rm -f bg8-one-page-checkout.php.bak
+
+# Update package.json if it exists
+if [ -f "package.json" ]; then
+    echo -e "${BLUE}Updating package.json...${NC}"
+    # Use node to update package.json (more reliable than sed for JSON)
+    if command -v node >/dev/null 2>&1; then
+        node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json')); pkg.version = '${NEW_VERSION}'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');"
+    else
+        # Fallback to sed if node is not available
+        sed -i.bak "s/\"version\": \".*\"/\"version\": \"${NEW_VERSION}\"/" package.json
+        rm -f package.json.bak
+    fi
+fi
 
 # Update CHANGELOG.md
 echo -e "${BLUE}Updating CHANGELOG.md...${NC}"
