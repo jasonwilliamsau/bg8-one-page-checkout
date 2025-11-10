@@ -5,8 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.1] - 2025-11-06
-
 ## [Unreleased]
 
 ### Added
@@ -17,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - TBD
+
+## [1.5.0] - 2025-01-XX
+
+### Added
+- Admin setting for customizing tab order (delivery, billing, shipping, payment)
+- Pickup/Delivery tab customization fields:
+  - Tab Heading (required) - Custom heading for the pickup/delivery step
+  - Tab Description (optional) - Description text displayed above choice buttons
+  - Tab Icon (optional) - Icon/emoji displayed in the tab label
+- Tab order validation to ensure all required tabs are present
+- Dynamic tab reordering based on admin settings
+
+### Changed
+- Tab order now configurable via admin settings instead of hardcoded
+- Pickup/delivery tab content now customizable (heading, description, icon)
+- Improved tab ordering logic to maintain correct step mapping
+
+## [1.4.1] - 2025-11-06
 
 ### Fixed
 - Critical bug fix: Loader no longer persists on order-received and order-pay pages

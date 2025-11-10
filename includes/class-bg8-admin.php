@@ -1,12 +1,12 @@
 <?php
-namespace BG8\OnePageCheckout;
+namespace BG8OPC\OnePageCheckout;
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 class Admin {
 
-    const OPTION_GROUP = 'bg8_sc_settings';
-    const OPTION_NAME = 'bg8_sc_options';
+    const OPTION_GROUP = 'bg8opc_settings';
+    const OPTION_NAME = 'bg8opc_options';
 
     public static function init() {
         add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu' ] );
@@ -186,6 +186,58 @@ class Admin {
             'bg8_sc_options',
             [ 'field' => 'pickup_delivery_first', 'default' => false ]
         );
+
+        // Tab Order section
+        add_settings_section(
+            'bg8_sc_tab_order',
+            '', // Empty title to prevent duplicate headings
+            [ __CLASS__, 'tab_order_section_callback' ],
+            'bg8-one-page-checkout'
+        );
+
+        add_settings_field(
+            'tab_order',
+            __( 'Tab Order', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'tab_order_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_tab_order',
+            [ 'field' => 'tab_order', 'default' => 'delivery,billing,shipping,payment' ]
+        );
+
+        // Pickup/Delivery Tab Customization section
+        add_settings_section(
+            'bg8_sc_pickup_delivery',
+            '', // Empty title to prevent duplicate headings
+            [ __CLASS__, 'pickup_delivery_section_callback' ],
+            'bg8-one-page-checkout'
+        );
+
+        add_settings_field(
+            'pickup_delivery_heading',
+            __( 'Tab Heading', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'pickup_delivery_heading', 'default' => 'How would you like to receive your order?', 'required' => true ]
+        );
+
+        add_settings_field(
+            'pickup_delivery_description',
+            __( 'Tab Description', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'textarea_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'pickup_delivery_description', 'default' => '', 'required' => false ]
+        );
+
+        add_settings_field(
+            'pickup_delivery_icon',
+            __( 'Tab Icon', 'bg8-one-page-checkout' ),
+            [ __CLASS__, 'text_field_callback' ],
+            'bg8-one-page-checkout',
+            'bg8_sc_pickup_delivery',
+            [ 'field' => 'pickup_delivery_icon', 'default' => '', 'required' => false ]
+        );
     }
 
     /**
@@ -203,10 +255,33 @@ class Admin {
         }
 
         // Sanitize text fields
-        $text_fields = [ 'step_1_label', 'step_1_heading', 'step_2_label', 'step_2_heading', 'step_3_label', 'step_3_heading', 'checkout_title', 'checkout_description' ];
+        $text_fields = [ 'step_1_label', 'step_1_heading', 'step_2_label', 'step_2_heading', 'step_3_label', 'step_3_heading', 'checkout_title', 'checkout_description', 'pickup_delivery_heading', 'pickup_delivery_icon' ];
         foreach ( $text_fields as $field ) {
             if ( isset( $input[ $field ] ) ) {
                 $sanitized[ $field ] = sanitize_text_field( $input[ $field ] );
+            }
+        }
+
+        // Sanitize textarea fields
+        if ( isset( $input['pickup_delivery_description'] ) ) {
+            $sanitized['pickup_delivery_description'] = sanitize_textarea_field( $input['pickup_delivery_description'] );
+        }
+
+        // Sanitize tab order
+        if ( isset( $input['tab_order'] ) ) {
+            $tab_order = sanitize_text_field( $input['tab_order'] );
+            // Validate tab order contains valid tabs
+            $valid_tabs = [ 'delivery', 'billing', 'shipping', 'payment' ];
+            $tabs = array_map( 'trim', explode( ',', $tab_order ) );
+            $tabs = array_filter( $tabs, function( $tab ) use ( $valid_tabs ) {
+                return in_array( strtolower( $tab ), $valid_tabs, true );
+            } );
+            // Ensure all required tabs are present
+            if ( count( $tabs ) === count( $valid_tabs ) && count( array_unique( $tabs ) ) === count( $valid_tabs ) ) {
+                $sanitized['tab_order'] = implode( ',', $tabs );
+            } else {
+                // Use default if invalid
+                $sanitized['tab_order'] = 'delivery,billing,shipping,payment';
             }
         }
 
@@ -215,6 +290,11 @@ class Admin {
             $sanitized['pickup_delivery_first'] = (bool) $input['pickup_delivery_first'];
         } else {
             $sanitized['pickup_delivery_first'] = false;
+        }
+
+        // Validate required fields
+        if ( isset( $sanitized['pickup_delivery_heading'] ) && empty( trim( $sanitized['pickup_delivery_heading'] ) ) ) {
+            $sanitized['pickup_delivery_heading'] = 'How would you like to receive your order?';
         }
 
         return $sanitized;
@@ -253,6 +333,22 @@ class Admin {
     }
 
     /**
+     * Tab order section callback
+     */
+    public static function tab_order_section_callback() {
+        echo '<div class="bg8-section-title">' . esc_html__( 'Tab Order', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Specify the order of tabs: delivery, billing, shipping, payment. Enter comma-separated values (e.g., delivery,billing,shipping,payment).', 'bg8-one-page-checkout' ) . '</p>';
+    }
+
+    /**
+     * Pickup/Delivery section callback
+     */
+    public static function pickup_delivery_section_callback() {
+        echo '<div class="bg8-section-title">' . esc_html__( 'Pickup/Delivery Tab Customization', 'bg8-one-page-checkout' ) . '</div>';
+        echo '<p>' . esc_html__( 'Customize the content of the pickup/delivery tab. Heading is required; description and icon are optional.', 'bg8-one-page-checkout' ) . '</p>';
+    }
+
+    /**
      * Color field callback
      */
     public static function color_field_callback( $args ) {
@@ -270,9 +366,46 @@ class Admin {
     public static function text_field_callback( $args ) {
         $options = get_option( self::OPTION_NAME, [] );
         $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
+        $required = isset( $args['required'] ) && $args['required'];
         
-        echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" />';
+        echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" ' . ( $required ? 'required' : '' ) . ' />';
         // translators: %s is the default text value
+        if ( ! empty( $args['default'] ) ) {
+            echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
+        }
+        if ( $required ) {
+            echo '<p class="bg8-description">' . esc_html__( 'This field is required.', 'bg8-one-page-checkout' ) . '</p>';
+        }
+    }
+
+    /**
+     * Textarea field callback
+     */
+    public static function textarea_field_callback( $args ) {
+        $options = get_option( self::OPTION_NAME, [] );
+        $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
+        $required = isset( $args['required'] ) && $args['required'];
+        
+        echo '<textarea id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" class="bg8-textarea-input" rows="4" ' . ( $required ? 'required' : '' ) . '>' . esc_textarea( $value ) . '</textarea>';
+        // translators: %s is the default text value
+        if ( ! empty( $args['default'] ) ) {
+            echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
+        }
+        if ( $required ) {
+            echo '<p class="bg8-description">' . esc_html__( 'This field is required.', 'bg8-one-page-checkout' ) . '</p>';
+        }
+    }
+
+    /**
+     * Tab order field callback
+     */
+    public static function tab_order_field_callback( $args ) {
+        $options = get_option( self::OPTION_NAME, [] );
+        $value = isset( $options[ $args['field'] ] ) ? $options[ $args['field'] ] : $args['default'];
+        
+        echo '<input type="text" id="' . esc_attr( $args['field'] ) . '" name="' . esc_attr( self::OPTION_NAME ) . '[' . esc_attr( $args['field'] ) . ']" value="' . esc_attr( $value ) . '" class="bg8-text-input" placeholder="delivery,billing,shipping,payment" />';
+        echo '<p class="bg8-description">' . esc_html__( 'Enter comma-separated tab names: delivery, billing, shipping, payment. All four tabs must be included.', 'bg8-one-page-checkout' ) . '</p>';
+        // translators: %s is the default tab order
         echo '<p class="bg8-description">' . sprintf( esc_html__( 'Default: %s', 'bg8-one-page-checkout' ), esc_html( $args['default'] ) ) . '</p>';
     }
 
@@ -310,9 +443,9 @@ class Admin {
                 echo '<p class="bg8-description">' . esc_html__( 'To find the rate ID, inspect the shipping method radio button value on the checkout page.', 'bg8-one-page-checkout' ) . '</p>';
             }
             
-            // Output the buffer
+            // Output the buffer (content is already escaped at point of creation)
             $output = ob_get_clean();
-            echo $output;
+            echo wp_kses_post( $output );
             
         } catch ( Exception $e ) {
             ob_end_clean();
@@ -490,11 +623,11 @@ class Admin {
         }
 
         // Register and enqueue admin stylesheet with inline styles
-        wp_register_style( 'bg8-admin-style', '' );
-        wp_enqueue_style( 'bg8-admin-style' );
+        wp_register_style( 'bg8opc-admin-style', '' );
+        wp_enqueue_style( 'bg8opc-admin-style' );
         
         // Add custom admin styling
-        wp_add_inline_style( 'bg8-admin-style', '
+        wp_add_inline_style( 'bg8opc-admin-style', '
             /* Hide admin notices on our page */
             .bg8-admin-page .notice {
                 display: none !important;
@@ -561,12 +694,18 @@ class Admin {
                 cursor: pointer;
             }
             .bg8-text-input,
+            .bg8-textarea-input,
             .bg8-select {
                 width: 300px;
                 padding: 10px;
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 font-size: 14px;
+            }
+            .bg8-textarea-input {
+                width: 100%;
+                max-width: 600px;
+                resize: vertical;
             }
             .bg8-description {
                 font-size: 12px;
@@ -616,11 +755,11 @@ class Admin {
         // Native HTML5 color picker - no JavaScript needed
         
         // Register and enqueue admin script
-        wp_register_script( 'bg8-admin-script', '', array(), BG8_SC_VERSION, true );
-        wp_enqueue_script( 'bg8-admin-script' );
+        wp_register_script( 'bg8opc-admin-script', '', array(), BG8OPC_VERSION, true );
+        wp_enqueue_script( 'bg8opc-admin-script' );
         
         // Add reset to defaults functionality
-        wp_add_inline_script( 'bg8-admin-script', '
+        wp_add_inline_script( 'bg8opc-admin-script', '
             function resetToDefaults() {
                 if (confirm("Are you sure you want to reset all settings to their default values? This cannot be undone.")) {
                     // Reset color fields
@@ -641,6 +780,14 @@ class Admin {
                     
                     // Reset checkbox
                     document.getElementById("pickup_delivery_first").checked = false;
+                    
+                    // Reset tab order
+                    document.getElementById("tab_order").value = "delivery,billing,shipping,payment";
+                    
+                    // Reset pickup/delivery customization
+                    document.getElementById("pickup_delivery_heading").value = "How would you like to receive your order?";
+                    document.getElementById("pickup_delivery_description").value = "";
+                    document.getElementById("pickup_delivery_icon").value = "";
                     
                     alert("Settings have been reset to defaults. Click Save Changes to apply them.");
                 }

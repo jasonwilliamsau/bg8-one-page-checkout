@@ -1,5 +1,5 @@
 <?php
-namespace BG8\OnePageCheckout;
+namespace BG8OPC\OnePageCheckout;
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
@@ -8,7 +8,7 @@ class Plugin {
     public static function init() {
         // Load admin functionality
         if ( is_admin() ) {
-            require_once BG8_SC_DIR . 'includes/class-bg8-admin.php';
+            require_once BG8OPC_DIR . 'includes/class-bg8-admin.php';
             Admin::init();
             return;
         }
@@ -18,16 +18,16 @@ class Plugin {
             return;
         }
 
-        add_action( 'wp_head', [ __CLASS__, 'prepaint_inline_flag' ], 1 );
-        add_action( 'wp_head', [ __CLASS__, 'inject_custom_css' ], 999 );
-        add_action( 'wp_head', [ __CLASS__, 'inject_header_config' ], 3 );
-        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ] );
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ], 10 );
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_inline_prepaint_script' ], 1 );
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_inline_custom_css' ], 11 );
+        add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_inline_header_config' ], 11 );
     }
 
     /**
      * Adds a pre-paint class to <html> on checkout to avoid FOUC and show overlay.
      */
-    public static function prepaint_inline_flag() {
+    public static function add_inline_prepaint_script() {
         // Only add loader on main checkout page, not order-received or order-pay pages
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
         if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
@@ -44,13 +44,16 @@ class Plugin {
         }
         // phpcs:enable WordPress.Security.NonceVerification.Recommended
         
-        echo '<script>document.documentElement.classList.add("wc-prep");</script>';
+        // Register a placeholder script handle for the prepaint inline script
+        wp_register_script( 'bg8opc-prepaint', '', [], BG8OPC_VERSION, false );
+        wp_enqueue_script( 'bg8opc-prepaint' );
+        wp_add_inline_script( 'bg8opc-prepaint', 'document.documentElement.classList.add("wc-prep");' );
     }
 
     /**
-     * Inject custom CSS variables based on admin settings
+     * Add inline custom CSS variables based on admin settings
      */
-    public static function inject_custom_css() {
+    public static function add_inline_custom_css() {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
         if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
 
@@ -60,14 +63,14 @@ class Plugin {
             $success_color = self::get_option( 'success_color', '#00a32a' );
             $header_text_color = self::get_option( 'header_text_color', '#ffffff' );
 
-            echo '<style id="bg8-sc-custom-vars">';
-            echo ':root {';
-            echo '--bg8-brand: ' . esc_attr( $brand_color ) . ';';
-            echo '--bg8-primary: ' . esc_attr( $primary_color ) . ';';
-            echo '--bg8-success: ' . esc_attr( $success_color ) . ';';
-            echo '--bg8-header-text: ' . esc_attr( $header_text_color ) . ';';
-            echo '}';
-            echo '</style>';
+            $custom_css = ':root {';
+            $custom_css .= '--bg8-brand: ' . esc_attr( $brand_color ) . ';';
+            $custom_css .= '--bg8-primary: ' . esc_attr( $primary_color ) . ';';
+            $custom_css .= '--bg8-success: ' . esc_attr( $success_color ) . ';';
+            $custom_css .= '--bg8-header-text: ' . esc_attr( $header_text_color ) . ';';
+            $custom_css .= '}';
+
+            wp_add_inline_style( 'bg8opc-checkout', $custom_css );
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
             // This error_log is intentionally used for debug purposes only
@@ -80,14 +83,14 @@ class Plugin {
      * Get option value with fallback to default (frontend-safe)
      */
     public static function get_option( $key, $default = '' ) {
-        $options = get_option( 'bg8_sc_options', [] );
+        $options = get_option( 'bg8opc_options', [] );
         return isset( $options[ $key ] ) ? $options[ $key ] : $default;
     }
 
     /**
-     * Inject header configuration for JavaScript
+     * Add inline header configuration for JavaScript
      */
-    public static function inject_header_config() {
+    public static function add_inline_header_config() {
         if ( ! function_exists('is_checkout') || ! is_checkout() ) { return; }
         if ( is_wc_endpoint_url( 'order-received' ) || is_wc_endpoint_url( 'order-pay' ) ) { return; }
 
@@ -95,18 +98,26 @@ class Plugin {
             $checkout_title = self::get_option( 'checkout_title', 'Checkout' );
             $checkout_description = self::get_option( 'checkout_description', 'Complete your purchase in 3 simple steps' );
             $pickup_delivery_first = self::get_option( 'pickup_delivery_first', false );
+            $tab_order = self::get_option( 'tab_order', 'delivery,billing,shipping,payment' );
+            $pickup_delivery_heading = self::get_option( 'pickup_delivery_heading', 'How would you like to receive your order?' );
+            $pickup_delivery_description = self::get_option( 'pickup_delivery_description', '' );
+            $pickup_delivery_icon = self::get_option( 'pickup_delivery_icon', '' );
             
             // Only show header if at least one field has content
             $show_header = !empty( $checkout_title ) || !empty( $checkout_description );
             
-            echo '<script id="bg8-sc-header-config">';
-            echo 'window.bg8CheckoutConfig = {';
-            echo 'title: ' . json_encode( $checkout_title ) . ',';
-            echo 'description: ' . json_encode( $checkout_description ) . ',';
-            echo 'showHeader: ' . ( $show_header ? 'true' : 'false' ) . ',';
-            echo 'pickupDeliveryFirst: ' . ( $pickup_delivery_first ? 'true' : 'false' );
-            echo '};';
-            echo '</script>';
+            $config_script = 'window.bg8CheckoutConfig = {';
+            $config_script .= 'title: ' . wp_json_encode( $checkout_title ) . ',';
+            $config_script .= 'description: ' . wp_json_encode( $checkout_description ) . ',';
+            $config_script .= 'showHeader: ' . ( $show_header ? 'true' : 'false' ) . ',';
+            $config_script .= 'pickupDeliveryFirst: ' . ( $pickup_delivery_first ? 'true' : 'false' ) . ',';
+            $config_script .= 'tabOrder: ' . wp_json_encode( $tab_order ) . ',';
+            $config_script .= 'pickupDeliveryHeading: ' . wp_json_encode( $pickup_delivery_heading ) . ',';
+            $config_script .= 'pickupDeliveryDescription: ' . wp_json_encode( $pickup_delivery_description ) . ',';
+            $config_script .= 'pickupDeliveryIcon: ' . wp_json_encode( $pickup_delivery_icon );
+            $config_script .= '};';
+
+            wp_add_inline_script( 'bg8opc-checkout', $config_script, 'before' );
         } catch ( Exception $e ) {
             // Silently fail if there's an error with options
             // This error_log is intentionally used for debug purposes only
@@ -124,18 +135,18 @@ class Plugin {
 
         // Styles
         wp_enqueue_style(
-            'bg8-sc-checkout',
-            BG8_SC_URL . 'assets/css/checkout.css',
+            'bg8opc-checkout',
+            BG8OPC_URL . 'assets/css/checkout.css',
             [],
-            BG8_SC_VERSION
+            BG8OPC_VERSION
         );
 
         // Script
         wp_enqueue_script(
-            'bg8-sc-checkout',
-            BG8_SC_URL . 'assets/js/checkout.js',
+            'bg8opc-checkout',
+            BG8OPC_URL . 'assets/js/checkout.js',
             [],
-            BG8_SC_VERSION,
+            BG8OPC_VERSION,
             true
         );
     }

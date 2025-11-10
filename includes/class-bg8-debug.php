@@ -3,15 +3,15 @@
  * BG8 One Page Checkout - Debug Helper
  * 
  * Add this to your wp-config.php temporarily to debug plugin issues:
- * define('BG8_SC_DEBUG', true);
+ * define('BG8OPC_DEBUG', true);
  */
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-class BG8_Debug {
+class BG8OPC_Debug {
     
     public static function init() {
-        if ( defined( 'BG8_SC_DEBUG' ) && BG8_SC_DEBUG ) {
+        if ( defined( 'BG8OPC_DEBUG' ) && BG8OPC_DEBUG ) {
             add_action( 'wp_footer', [ __CLASS__, 'debug_info' ] );
             add_action( 'admin_footer', [ __CLASS__, 'debug_info' ] );
         }
@@ -40,24 +40,24 @@ class BG8_Debug {
         }
         
         // Plugin constants
-        echo esc_html__( 'BG8_SC_VERSION:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_VERSION' ) ? BG8_SC_VERSION : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
-        echo esc_html__( 'BG8_SC_DIR:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_DIR' ) ? BG8_SC_DIR : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
-        echo esc_html__( 'BG8_SC_URL:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8_SC_URL' ) ? BG8_SC_URL : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
+        echo esc_html__( 'BG8OPC_VERSION:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8OPC_VERSION' ) ? BG8OPC_VERSION : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
+        echo esc_html__( 'BG8OPC_DIR:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8OPC_DIR' ) ? BG8OPC_DIR : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
+        echo esc_html__( 'BG8OPC_URL:', 'bg8-one-page-checkout' ) . ' ' . esc_html( defined( 'BG8OPC_URL' ) ? BG8OPC_URL : esc_html__( 'Not defined', 'bg8-one-page-checkout' ) ) . '<br>';
         
         // Plugin options
-        $options = get_option( 'bg8_sc_options', [] );
+        $options = get_option( 'bg8opc_options', [] );
         echo esc_html__( 'Options Count:', 'bg8-one-page-checkout' ) . ' ' . esc_html( count( $options ) ) . '<br>';
         
         // Error log check
         $error_log = ini_get( 'error_log' );
         echo esc_html__( 'Error Log:', 'bg8-one-page-checkout' ) . ' ' . esc_html( $error_log ? $error_log : esc_html__( 'Not set', 'bg8-one-page-checkout' ) ) . '<br>';
         
-        echo '<br><small>' . esc_html__( 'Remove BG8_SC_DEBUG from wp-config.php to hide this.', 'bg8-one-page-checkout' ) . '</small>';
+        echo '<br><small>' . esc_html__( 'Remove BG8OPC_DEBUG from wp-config.php to hide this.', 'bg8-one-page-checkout' ) . '</small>';
         echo '</div>';
     }
     
     public static function log_error( $message ) {
-        if ( defined( 'BG8_SC_DEBUG' ) && BG8_SC_DEBUG ) {
+        if ( defined( 'BG8OPC_DEBUG' ) && BG8OPC_DEBUG ) {
             // This error_log is intentionally used for debug purposes only
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Debug functionality only
             error_log( '[BG8 One Page Checkout] ' . $message );
@@ -66,4 +66,4 @@ class BG8_Debug {
 }
 
 // Initialize debug if enabled
-BG8_Debug::init();
+BG8OPC_Debug::init();

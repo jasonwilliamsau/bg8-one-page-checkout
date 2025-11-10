@@ -103,13 +103,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check if pickup/delivery first is enabled
   const config = window.bg8CheckoutConfig || {};
   const pickupDeliveryFirst = config.pickupDeliveryFirst === true || config.pickupDeliveryFirst === 'true';
+  const pickupDeliveryHeading = config.pickupDeliveryHeading || 'How would you like to receive your order?';
+  const pickupDeliveryDescription = config.pickupDeliveryDescription || '';
+  const pickupDeliveryIcon = config.pickupDeliveryIcon || '';
   let pickupDeliveryChoice = null;
   
   // Create pickup/delivery selection step if enabled
   let pickupDeliveryStep = null;
   let pickupDeliveryTab = null;
   if (pickupDeliveryFirst) {
-    pickupDeliveryStep = makeStep('wc-step-pickup-delivery', 'How would you like to receive your order?');
+    pickupDeliveryStep = makeStep('wc-step-pickup-delivery', pickupDeliveryHeading);
+    
+    // Add description if provided
+    if (pickupDeliveryDescription) {
+      const descEl = document.createElement('p');
+      descEl.className = 'wc-pickup-delivery-description';
+      descEl.textContent = pickupDeliveryDescription;
+      pickupDeliveryStep.body.prepend(descEl);
+    }
     const choiceContainer = document.createElement('div');
     choiceContainer.className = 'wc-pickup-delivery-choice';
     
@@ -202,7 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
     choiceContainer.append(pickupBtn, deliveryBtn);
     pickupDeliveryStep.body.append(choiceContainer);
     steps.push(pickupDeliveryStep.panel);
-    pickupDeliveryTab = makeTab('wc-step-pickup-delivery', 'Choose', 0);
+    
+    // Use custom icon if provided, otherwise use default label
+    const pickupDeliveryTabLabel = pickupDeliveryIcon || 'Choose';
+    pickupDeliveryTab = makeTab('wc-step-pickup-delivery', pickupDeliveryTabLabel, 0);
+    // Add icon to tab if provided
+    if (pickupDeliveryIcon) {
+      const iconEl = document.createElement('span');
+      iconEl.className = 'wc-tab-icon';
+      iconEl.textContent = pickupDeliveryIcon;
+      pickupDeliveryTab.stepLabel.prepend(iconEl);
+      pickupDeliveryTab.stepLabel.insertAdjacentText('beforeend', ' ');
+    }
     tabs.push(pickupDeliveryTab);
     
     // Pre-select delivery (skip visibility update until step2 is created)
@@ -299,6 +321,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
   steps.push(step3.panel);
   tabs.push(makeTab('wc-step-confirm', 'Confirm', pickupDeliveryFirst ? 3 : 2));
+
+  // Reorder tabs based on config if provided
+  const tabOrder = config.tabOrder || (pickupDeliveryFirst ? 'delivery,billing,shipping,payment' : 'billing,shipping,payment');
+  if (tabOrder) {
+    const orderArray = tabOrder.split(',').map(t => t.trim().toLowerCase());
+    
+    // Create a mapping of tab types to their indices
+    const tabTypeMap = {};
+    tabs.forEach((tab, index) => {
+      const tabId = tab.step.getAttribute('aria-controls');
+      if (tabId === 'wc-step-pickup-delivery') {
+        tabTypeMap['delivery'] = index;
+      } else if (tabId === 'wc-step-billing') {
+        tabTypeMap['billing'] = index;
+      } else if (tabId === 'wc-step-shipping') {
+        tabTypeMap['shipping'] = index;
+      } else if (tabId === 'wc-step-confirm') {
+        tabTypeMap['payment'] = index;
+      }
+    });
+    
+    // Reorder tabs array based on config order
+    const reorderedTabs = [];
+    const usedIndices = new Set();
+    
+    orderArray.forEach(tabType => {
+      const index = tabTypeMap[tabType];
+      if (index !== undefined && !usedIndices.has(index)) {
+        reorderedTabs.push(tabs[index]);
+        usedIndices.add(index);
+      }
+    });
+    
+    // Add any remaining tabs that weren't in the order (shouldn't happen, but safety check)
+    tabs.forEach((tab, index) => {
+      if (!usedIndices.has(index)) {
+        reorderedTabs.push(tab);
+      }
+    });
+    
+    // Update tabs array with reordered version
+    tabs.length = 0;
+    tabs.push(...reorderedTabs);
+    
+    // Update step numbers to reflect new order
+    tabs.forEach((tab, newIndex) => {
+      tab.number.textContent = newIndex + 1;
+      // Update data-step-index to maintain correct step mapping
+      const originalIndex = parseInt(tab.step.getAttribute('data-step-index'), 10);
+      tab.step.setAttribute('data-step-index', String(originalIndex));
+    });
+  }
 
   // Assemble
   tabs.forEach(t => stepsIndicator.append(t.step));
