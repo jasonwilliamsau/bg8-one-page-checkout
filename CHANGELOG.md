@@ -20,17 +20,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Admin setting for customizing tab order (delivery, billing, shipping, payment)
-- Pickup/Delivery tab customization fields:
-  - Tab Heading (required) - Custom heading for the pickup/delivery step
-  - Tab Description (optional) - Description text displayed above choice buttons
-  - Tab Icon (optional) - Icon/emoji displayed in the tab label
+- Pickup/Delivery button customization fields:
+  - Pickup Button Text, Icon, and Description
+  - Delivery Button Text, Icon, and Description
 - Tab order validation to ensure all required tabs are present
 - Dynamic tab reordering based on admin settings
+- Backward compatibility for old field names (step_1_label, etc.)
 
 ### Changed
 - Tab order now configurable via admin settings instead of hardcoded
-- Pickup/delivery tab content now customizable (heading, description, icon)
+- Tab Labels section now uses Customer, Recipient, Delivery, Payment instead of Step 1, 2, 3
+- Tab Order section now appears before Checkout Options section
 - Improved tab ordering logic to maintain correct step mapping
+
+### Fixed
+- Admin field names corrected (Customer/Recipient/Delivery/Payment instead of Step 1/2/3)
+- Section order corrected (Tab Order before Checkout Options)
+- Pickup/Delivery customization now correctly customizes buttons instead of tab
+- Saved values now properly display in admin (backward compatibility maintained)
 
 ## [1.4.1] - 2025-11-06
 
