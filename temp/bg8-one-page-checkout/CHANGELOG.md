@@ -5,9 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.2] - 2025-11-10
-
-## [1.4.2] - 2025-11-10
+## [Unreleased]
 
 ### Added
 - TBD
@@ -17,21 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - TBD
-
-### Added
-- Version consistency checks in deploy.sh and release.sh
-- Automatic stable tag and version updates in release scripts
-
-### Changed
-- Updated version-bump.sh to use correct constant name (BG8OPC_VERSION)
-- Improved version verification in release scripts
-
-### Fixed
-- Removed error_log() calls from production code (WordPress coding standards compliance)
-- Fixed missing translators comments for esc_html__() with placeholders
-- Added version parameter to wp_register_style() to prevent browser caching issues
-- Fixed stable tag mismatch in readme.txt
-- Fixed version mismatch in README.md
 
 ## [1.5.1] - 2025-11-10
 
